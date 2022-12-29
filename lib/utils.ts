@@ -1,5 +1,6 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { randomBytes } from "crypto";
+import { IChannel, ChannelVisibility } from "./models/Channel";
 
 export const buildSuccessResult = <T>(
   body: T | null | undefined = null,
@@ -27,4 +28,13 @@ export const generateSecureRandomId = (size: number = 2, encoding: BufferEncodin
 export const toKey = (aString = ""): string => {
   const specialCharRegex = /[&\/\\#,+()$~%.'":*?<>{}]/g;
   return aString.replace(specialCharRegex, "").replace(/\s+/g, "-").toLowerCase();
+};
+
+export const ensureAccessForUser = (channel: IChannel, user: string) => {
+  if (
+    channel.visibility === ChannelVisibility.Private &&
+    !channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())
+  ) {
+    throw new Error(`Access denied: (User - ${user} does not have access to the channel - ${channel.name})`);
+  }
 };

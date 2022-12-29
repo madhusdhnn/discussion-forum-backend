@@ -25,6 +25,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       channelId: channelId,
       name: channelRequest.name,
       visibility: channelVisibility,
+      questions: 0,
       participants: [{ isOwner: true, name: channelRequest.owner }],
       createdAt: new Date().getTime(),
     };

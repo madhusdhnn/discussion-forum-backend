@@ -4,6 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import { ApiStack } from "../lib/api/api-stack";
 import { DataStoreStack } from "../lib/datastore/datastore-stack";
 import { ChannelsStack } from "../lib/channels/channels.stack";
+import { QuestionsStack } from "../lib/questions/questions.stack";
 
 const app = new cdk.App();
 const stackProps = {
@@ -17,3 +18,4 @@ const apiStack = new ApiStack(app, "DiscussionForumApiStack", stackProps);
 const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", stackProps);
 
 new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, stackProps);
+new QuestionsStack(app, "QuestionsStack", apiStack, dataStoreStack, stackProps);

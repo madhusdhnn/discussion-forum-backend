@@ -28,6 +28,7 @@ export interface IChannel {
   name: string;
   visibility: ChannelVisibilityType;
   participants: IParticipant[];
+  questions: number;
   createdAt: number;
 }
 
