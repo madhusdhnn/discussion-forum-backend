@@ -1,9 +1,9 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IChannel } from "../models/Channel";
-import { IQuestionVoteRequest } from "../models/Question";
-import { parseVoteOp } from "../models/Vote";
+import { IAnswerVoteRequest } from "../models/Answer";
 import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, getVoteOperator } from "../utils";
+import { parseVoteOp } from "../models/Vote";
 
 const ddb = new DocumentClient();
 
@@ -13,7 +13,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   }
 
   try {
-    const requestBody = JSON.parse(event.body) as IQuestionVoteRequest;
+    const requestBody = JSON.parse(event.body) as IAnswerVoteRequest;
 
     const getChannelResult = await ddb
       .get({
@@ -34,8 +34,8 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     await ddb
       .update({
-        TableName: process.env.QUESTIONS_TABLE_NAME as string,
-        Key: { channelId: requestBody.channelId, questionId: requestBody.questionId },
+        TableName: process.env.ANSWERS_TABLE_NAME as string,
+        Key: { questionId: requestBody.questionId, answerId: requestBody.answerId },
         UpdateExpression: "SET voteCount = voteCount " + getVoteOperator(voteOp) + " :value",
         ExpressionAttributeValues: {
           ":value": 1,

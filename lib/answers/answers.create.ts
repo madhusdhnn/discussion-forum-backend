@@ -1,9 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IAnswer, IAnswerRequest, IAnswerResponse } from "../models/Answer";
 import { IChannel } from "../models/Channel";
-import { IQuestionVoteRequest } from "../models/Question";
-import { parseVoteOp } from "../models/Vote";
-import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, getVoteOperator } from "../utils";
+import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, generateSecureRandomId } from "../utils";
 
 const ddb = new DocumentClient();
 
@@ -13,7 +12,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   }
 
   try {
-    const requestBody = JSON.parse(event.body) as IQuestionVoteRequest;
+    const requestBody = JSON.parse(event.body) as IAnswerRequest;
 
     const getChannelResult = await ddb
       .get({
@@ -28,22 +27,39 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new Error(`No channel found: (Channel ID: ${requestBody.channelId})`);
     }
 
-    ensureChannelAccessForUser(channel, requestBody.voter);
+    ensureChannelAccessForUser(channel, requestBody.postedBy);
 
-    const voteOp = parseVoteOp(requestBody.operation);
+    const dbData: IAnswer = {
+      answerId: generateSecureRandomId(4),
+      ...requestBody,
+      voteCount: 0,
+      createdAt: new Date().getTime(),
+    };
+
+    await ddb
+      .put({
+        TableName: process.env.ANSWERS_TABLE_NAME as string,
+        Item: dbData,
+      })
+      .promise();
 
     await ddb
       .update({
         TableName: process.env.QUESTIONS_TABLE_NAME as string,
         Key: { channelId: requestBody.channelId, questionId: requestBody.questionId },
-        UpdateExpression: "SET voteCount = voteCount " + getVoteOperator(voteOp) + " :value",
+        UpdateExpression: "SET answers = answers + :value",
         ExpressionAttributeValues: {
           ":value": 1,
         },
       })
       .promise();
 
-    return buildSuccessResult(null, 204);
+    const response: IAnswerResponse = {
+      answerId: dbData.answerId,
+      createdAt: new Date(dbData.createdAt),
+    };
+
+    return buildSuccessResult(response, 201);
   } catch (e: any) {
     return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
   }

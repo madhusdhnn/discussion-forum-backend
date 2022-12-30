@@ -1,10 +1,11 @@
 #!/usr/bin/env node
-import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
+import "source-map-support/register";
 import { ApiStack } from "../lib/api/api-stack";
-import { DataStoreStack } from "../lib/datastore/datastore-stack";
 import { ChannelsStack } from "../lib/channels/channels.stack";
+import { DataStoreStack } from "../lib/datastore/datastore-stack";
 import { QuestionsStack } from "../lib/questions/questions.stack";
+import { AnswersStack } from "../lib/answers/answers.stack";
 
 const app = new cdk.App();
 const stackProps = {
@@ -19,3 +20,4 @@ const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", 
 
 new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, stackProps);
 new QuestionsStack(app, "QuestionsStack", apiStack, dataStoreStack, stackProps);
+new AnswersStack(app, "AnswersStack", apiStack, dataStoreStack, stackProps);

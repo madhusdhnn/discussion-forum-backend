@@ -2,7 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IChannel } from "../models/Channel";
 import { IQuestion, IQuestionRequest, IQuestionResponse } from "../models/Question";
-import { buildErrorResult, buildSuccessResult, generateSecureRandomId, ensureAccessForUser } from "../utils";
+import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, generateSecureRandomId } from "../utils";
 
 const ddb = new DocumentClient();
 
@@ -28,7 +28,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new Error(`No channel found: (Channel ID: ${questionRequest.channelId})`);
     }
 
-    ensureAccessForUser(channel, questionRequest.owner);
+    ensureChannelAccessForUser(channel, questionRequest.owner);
 
     const dbData: IQuestion = {
       owner: questionRequest.owner,
@@ -36,6 +36,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       question: questionRequest.question,
       questionId: questionId,
       voteCount: 0,
+      answers: 0,
       createdAt: new Date().getTime(),
     };
 

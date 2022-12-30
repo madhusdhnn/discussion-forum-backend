@@ -1,6 +1,7 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { randomBytes } from "crypto";
-import { IChannel, ChannelVisibility } from "./models/Channel";
+import { IChannel } from "./models/Channel";
+import { VoteOpType } from "./models/Vote";
 
 export const buildSuccessResult = <T>(
   body: T | null | undefined = null,
@@ -30,11 +31,19 @@ export const toKey = (aString = ""): string => {
   return aString.replace(specialCharRegex, "").replace(/\s+/g, "-").toLowerCase();
 };
 
-export const ensureAccessForUser = (channel: IChannel, user: string) => {
-  if (
-    channel.visibility === ChannelVisibility.Private &&
-    !channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())
-  ) {
+export const ensureChannelAccessForUser = (channel: IChannel, user: string) => {
+  if (!channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())) {
     throw new Error(`Access denied: (User - ${user} does not have access to the channel - ${channel.name})`);
+  }
+};
+
+export const getVoteOperator = (voteOp: VoteOpType): string => {
+  switch (voteOp) {
+    case "UP":
+      return "+";
+    case "DOWN":
+      return "-";
+    default:
+      throw new Error("Vote operation type is null or undefined");
   }
 };

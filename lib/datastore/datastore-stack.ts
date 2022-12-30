@@ -5,6 +5,7 @@ import { Construct } from "constructs";
 export class DataStoreStack extends Stack {
   readonly channelsTable: Table;
   readonly questionsTable: Table;
+  readonly answersTable: Table;
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -19,6 +20,13 @@ export class DataStoreStack extends Stack {
       partitionKey: { name: "channelId", type: AttributeType.STRING },
       sortKey: { name: "questionId", type: AttributeType.STRING },
       tableName: "Questions",
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    this.answersTable = new Table(this, "answers-table", {
+      partitionKey: { name: "questionId", type: AttributeType.STRING },
+      sortKey: { name: "answerId", type: AttributeType.STRING },
+      tableName: "Answers",
       removalPolicy: RemovalPolicy.DESTROY,
     });
   }
