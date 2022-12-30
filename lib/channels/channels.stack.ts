@@ -37,13 +37,9 @@ export class ChannelsStack extends Stack {
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
 
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
-      apiKeyRequired: true,
-    });
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
     apiResource
       .addResource("{channelId}")
-      .addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }), {
-        apiKeyRequired: true,
-      });
+      .addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }));
   }
 }
