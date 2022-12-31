@@ -15,4 +15,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ## TODOS
 
-- [ ] Get Channel by ID - Perhaps use Elasticache
+- [ ] Integrate Cognito User pool
+- [ ] Authorize APIs based on Cognito Roles (Cognito/ Lambda authorizers)
+- [ ] Get Channel by ID - Perhaps use Elasticache or DAX
+- [ ] Client/ Server Error response segregation

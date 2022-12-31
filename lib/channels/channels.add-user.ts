@@ -1,5 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
+import { IChannel } from "../models/Channel";
 import { buildErrorResult, buildSuccessResult } from "../utils";
 
 const ddb = new DynamoDB.DocumentClient();
@@ -14,6 +15,8 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   try {
     const channelId = event.pathParameters?.["channelId"] as string;
     const requestBody: ParticipantName = JSON.parse(event.body);
+
+    // TODO: allow further only if admin. Admin is about the Role
 
     await ddb
       .update({

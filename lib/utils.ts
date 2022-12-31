@@ -32,7 +32,10 @@ export const toKey = (aString = ""): string => {
 };
 
 export const ensureChannelAccessForUser = (channel: IChannel, user: string) => {
-  if (!channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())) {
+  if (
+    channel.visibility === "PRIVATE" &&
+    !channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())
+  ) {
     throw new Error(`Access denied: (User - ${user} does not have access to the channel - ${channel.name})`);
   }
 };
