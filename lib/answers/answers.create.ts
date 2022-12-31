@@ -29,11 +29,15 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     ensureChannelAccessForUser(channel, requestBody.postedBy);
 
+    const nowTime = new Date().getTime();
+
     const dbData: IAnswer = {
       answerId: generateSecureRandomId(4),
       ...requestBody,
       voteCount: 0,
-      createdAt: new Date().getTime(),
+      isAccepted: false,
+      createdAt: nowTime,
+      updatedAt: nowTime,
     };
 
     await ddb
@@ -61,6 +65,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response, 201);
   } catch (e: any) {
+    console.log(e);
     return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
   }
 };

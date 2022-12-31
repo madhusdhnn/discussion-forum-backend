@@ -36,7 +36,6 @@ export class ChannelsStack extends Stack {
     dataStoreStack.channelsTable.grantReadWriteData(addUserToChannelFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
     apiResource
       .addResource("{channelId}")

@@ -10,6 +10,7 @@ export interface IQuestionBase {
   questionId: string;
   channelId: string;
   createdAt: number;
+  updatedAt: number;
 }
 
 export interface IQuestion extends IQuestionBase {
@@ -19,7 +20,6 @@ export interface IQuestion extends IQuestionBase {
 
 export interface IQuestionVoteRequest {
   channelId: string;
-  questionId: string;
   voter: string;
   operation: string;
 }

@@ -40,8 +40,9 @@ export class QuestionsStack extends Stack {
     dataStoreStack.questionsTable.grantWriteData(voteQuestionFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }));
+
+    const questionResource = apiResource.addResource("{questionId}");
+    questionResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }));
   }
 }

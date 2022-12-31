@@ -30,6 +30,8 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     ensureChannelAccessForUser(channel, questionRequest.owner);
 
+    const nowTime = new Date().getTime();
+
     const dbData: IQuestion = {
       owner: questionRequest.owner,
       channelId: questionRequest.channelId,
@@ -37,7 +39,8 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       questionId: questionId,
       voteCount: 0,
       answers: 0,
-      createdAt: new Date().getTime(),
+      createdAt: nowTime,
+      updatedAt: nowTime,
     };
 
     await ddb
@@ -66,6 +69,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response, 201);
   } catch (e: any) {
+    console.log(e);
     return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
   }
 };

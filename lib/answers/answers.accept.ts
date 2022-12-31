@@ -1,9 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IAnswerAcceptRequest } from "../models/Answer";
 import { IChannel } from "../models/Channel";
-import { IAnswerVoteRequest } from "../models/Answer";
-import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, getVoteOperator } from "../utils";
-import { parseVoteOp } from "../models/Vote";
+import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser } from "../utils";
 
 const ddb = new DocumentClient();
 
@@ -12,8 +11,9 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     return buildErrorResult({ error: "No request body found" }, 400);
   }
 
+  const requestBody = JSON.parse(event.body) as IAnswerAcceptRequest;
+
   try {
-    const requestBody = JSON.parse(event.body) as IAnswerVoteRequest;
     const answerId = event.pathParameters?.["answerId"];
 
     const getChannelResult = await ddb
@@ -29,22 +29,36 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new Error(`No channel found: (Channel ID: ${requestBody.channelId})`);
     }
 
-    ensureChannelAccessForUser(channel, requestBody.voter);
+    ensureChannelAccessForUser(channel, requestBody.acceptor);
 
-    const voteOp = parseVoteOp(requestBody.operation);
+    const getQuestionsResult = await ddb
+      .get({
+        TableName: process.env.QUESTIONS_TABLE_NAME as string,
+        Key: { channelId: requestBody.channelId, questionId: requestBody.questionId },
+        ProjectionExpression: "#O",
+        ExpressionAttributeNames: {
+          "#O": "owner",
+        },
+      })
+      .promise();
+
+    const { owner } = getQuestionsResult.Item as any;
+
+    if (requestBody.acceptor !== owner) {
+      throw new Error(`Access denied: (User ${requestBody.acceptor} is not the owner of the question)`);
+    }
 
     await ddb
       .update({
         TableName: process.env.ANSWERS_TABLE_NAME as string,
         Key: { questionId: requestBody.questionId, answerId: answerId },
-        UpdateExpression: "SET voteCount = voteCount " + getVoteOperator(voteOp) + " :value, updatedAt = :updatedAt",
+        UpdateExpression: "SET isAccepted = :isAccepted, updatedAt = :updatedAt",
         ExpressionAttributeValues: {
-          ":value": 1,
+          ":isAccepted": requestBody.isAccepted,
           ":updatedAt": new Date().getTime(),
         },
       })
       .promise();
-
     return buildSuccessResult(null, 204);
   } catch (e: any) {
     console.log(e);

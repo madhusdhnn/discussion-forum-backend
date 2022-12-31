@@ -1,9 +1,8 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IAnswerUpdateRequest } from "../models/Answer";
 import { IChannel } from "../models/Channel";
-import { IQuestionVoteRequest } from "../models/Question";
-import { parseVoteOp } from "../models/Vote";
-import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, getVoteOperator } from "../utils";
+import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser } from "../utils";
 
 const ddb = new DocumentClient();
 
@@ -12,9 +11,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     return buildErrorResult({ error: "No request body found" }, 400);
   }
 
+  const requestBody = JSON.parse(event.body) as IAnswerUpdateRequest;
+
   try {
-    const requestBody = JSON.parse(event.body) as IQuestionVoteRequest;
-    const questionId = event.pathParameters?.["questionId"];
+    const answerId = event.pathParameters?.["answerId"];
 
     const getChannelResult = await ddb
       .get({
@@ -29,25 +29,30 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new Error(`No channel found: (Channel ID: ${requestBody.channelId})`);
     }
 
-    ensureChannelAccessForUser(channel, requestBody.voter);
-
-    const voteOp = parseVoteOp(requestBody.operation);
+    ensureChannelAccessForUser(channel, requestBody.updatedBy);
 
     await ddb
       .update({
-        TableName: process.env.QUESTIONS_TABLE_NAME as string,
-        Key: { channelId: requestBody.channelId, questionId: questionId },
-        UpdateExpression: "SET voteCount = voteCount " + getVoteOperator(voteOp) + " :value, updatedAt = :updatedAt",
+        TableName: process.env.ANSWERS_TABLE_NAME as string,
+        Key: { questionId: requestBody.questionId, answerId: answerId },
+        UpdateExpression: "SET answer = :answer, updatedAt = :updatedAt",
+        ConditionExpression: "postedBy = :updatedBy",
         ExpressionAttributeValues: {
-          ":value": 1,
+          ":answer": requestBody.answer,
+          ":updatedBy": requestBody.updatedBy,
           ":updatedAt": new Date().getTime(),
         },
       })
       .promise();
-
     return buildSuccessResult(null, 204);
   } catch (e: any) {
     console.log(e);
+    if (e.code && e.code === "ConditionalCheckFailedException") {
+      return buildErrorResult(
+        { message: `Access Denied: (User: ${requestBody.updatedBy} is not the owner of the answer)` },
+        403
+      );
+    }
     return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
   }
 };
