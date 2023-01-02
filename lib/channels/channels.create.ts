@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { IChannel, IChannelRequest, IChannelResponse, parseChannelVisibility } from "../models/Channel";
+import { IChannel, IChannelRequest, IChannelSummaryResponse, parseChannelVisibility } from "../models/Channel";
 import { buildErrorResult, buildSuccessResult, toKey } from "../utils";
 
 const ddb = new DocumentClient();
@@ -28,6 +28,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       totalQuestions: 0,
       participants: [{ isOwner: true, name: channelRequest.owner }],
       createdAt: new Date().getTime(),
+      updatedAt: new Date().getTime(),
     };
 
     await ddb
@@ -38,10 +39,9 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       })
       .promise();
 
-    const response: IChannelResponse = {
+    const response: IChannelSummaryResponse = {
       channelId: dbData.channelId,
       name: dbData.name,
-      createdAt: new Date(dbData.createdAt),
     };
 
     return buildSuccessResult(response, 201);

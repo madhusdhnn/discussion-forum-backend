@@ -1,3 +1,5 @@
+import { IPagedResponse } from "./Pagination";
+
 export const ChannelVisibility = {
   Public: "PUBLIC",
   Private: "PRIVATE",
@@ -11,10 +13,9 @@ export interface IChannelRequest {
 
 export type ChannelVisibilityType = typeof ChannelVisibility[keyof typeof ChannelVisibility];
 
-export interface IChannelResponse {
+export interface IChannelSummaryResponse {
   channelId: string;
   name: string;
-  createdAt: Date;
 }
 
 export interface IParticipant {
@@ -30,7 +31,21 @@ export interface IChannel {
   participants: IParticipant[];
   totalQuestions: number;
   createdAt: number;
+  updatedAt: number;
 }
+
+export interface IChannelResponse {
+  owner: string;
+  channelId: string;
+  name: string;
+  visibility: ChannelVisibilityType;
+  participants: IParticipant[];
+  totalQuestions: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IChannelsPagedResponse extends IPagedResponse<IChannelResponse> {}
 
 export const parseChannelVisibility = (channelVisibilityStr: string): ChannelVisibilityType => {
   if (!channelVisibilityStr) {

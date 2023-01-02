@@ -10,6 +10,7 @@ export class DataStoreStack extends Stack {
   readonly answersTable: Table;
 
   readonly questionCreatedTimeStampIdxOutputName = "DiscussionForumDataStoreStack:QctIndex";
+  readonly answersVoteIdxOutputName = "DiscussionForumDateStoreStack:avIndex";
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -42,6 +43,16 @@ export class DataStoreStack extends Stack {
       sortKey: { name: "answerId", type: AttributeType.STRING },
       tableName: "Answers",
       removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    const answersVoteIdxOutput = new CfnOutput(this, "answers-vote-index", {
+      value: "AnswersVoteIndex",
+      exportName: this.answersVoteIdxOutputName,
+    });
+
+    this.answersTable.addLocalSecondaryIndex({
+      indexName: answersVoteIdxOutput.value,
+      sortKey: { name: "totalVotes", type: AttributeType.NUMBER },
     });
   }
 }

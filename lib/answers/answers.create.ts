@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { IAnswer, IAnswerRequest, IAnswerResponse } from "../models/Answer";
+import { IAnswer, IAnswerRequest, IAnswerSummaryResponse } from "../models/Answer";
 import { IChannel } from "../models/Channel";
 import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, generateSecureRandomId } from "../utils";
 
@@ -58,7 +58,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       })
       .promise();
 
-    const response: IAnswerResponse = {
+    const response: IAnswerSummaryResponse = {
       answerId: dbData.answerId,
       createdAt: new Date(dbData.createdAt),
     };

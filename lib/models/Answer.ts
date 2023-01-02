@@ -1,3 +1,5 @@
+import { IPagedResponse } from "./Pagination";
+
 export interface IAnswerRequest {
   answer: string;
   channelId: string;
@@ -19,7 +21,7 @@ export interface IAnswer extends IAnswerBase {
   updatedAt: number;
 }
 
-export interface IAnswerResponse {
+export interface IAnswerSummaryResponse {
   answerId: string;
   createdAt: Date;
 }
@@ -44,3 +46,13 @@ export interface IAnswerAcceptRequest {
   isAccepted: boolean;
   acceptor: string;
 }
+
+export interface IAnswerResponse extends IAnswerBase {
+  isAccepted: boolean;
+  postedBy: string;
+  totalVotes: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IAnswersPagedResponse extends IPagedResponse<IAnswerResponse> {}

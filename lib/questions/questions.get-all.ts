@@ -9,6 +9,9 @@ const ddb = new DocumentClient();
 exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   try {
     const channelId = event.queryStringParameters?.["channelId"];
+    if (!channelId) {
+      throw new Error("Paramter missing: (Required parameter channelId is null or undefined)");
+    }
     const count = parseInt(event.queryStringParameters?.["count"] as string) || 10;
     const nextEvaluationKey = event.queryStringParameters?.["nextEvaluationKey"];
 
