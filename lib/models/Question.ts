@@ -1,3 +1,5 @@
+import { IPagedResponse } from "./Pagination";
+
 export interface IQuestionRequest {
   question: string;
   owner: string;
@@ -9,13 +11,13 @@ export interface IQuestionBase {
   owner: string;
   questionId: string;
   channelId: string;
-  createdAt: number;
-  updatedAt: number;
 }
 
 export interface IQuestion extends IQuestionBase {
-  voteCount: number;
-  answers: number;
+  totalVotes: number;
+  totalAnswers: number;
+  createdAt: number;
+  updatedAt: number;
 }
 
 export interface IQuestionVoteRequest {
@@ -24,8 +26,17 @@ export interface IQuestionVoteRequest {
   operation: string;
 }
 
-export interface IQuestionResponse {
+export interface IQuestionCreateResponse {
   questionId: string;
   question: string;
   createdAt: Date;
 }
+
+export interface IQuestionResponse extends IQuestionBase {
+  totalVotes: number;
+  totalAnswers: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IQuestionsPagedResponse extends IPagedResponse<IQuestionResponse> {}

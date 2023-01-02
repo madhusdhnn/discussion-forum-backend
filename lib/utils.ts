@@ -50,3 +50,11 @@ export const getVoteOperator = (voteOp: VoteOpType): string => {
       throw new Error("Vote operation type is null or undefined");
   }
 };
+
+export const base64Encode = (plainText: string): string => {
+  return Buffer.from(plainText).toString("base64");
+};
+
+export const base64Decode = (encoded: string): string => {
+  return Buffer.from(encoded, "base64").toString();
+};

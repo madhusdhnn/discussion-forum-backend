@@ -34,7 +34,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const dbData: IAnswer = {
       answerId: generateSecureRandomId(4),
       ...requestBody,
-      voteCount: 0,
+      totalVotes: 0,
       isAccepted: false,
       createdAt: nowTime,
       updatedAt: nowTime,
@@ -51,7 +51,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .update({
         TableName: process.env.QUESTIONS_TABLE_NAME as string,
         Key: { channelId: requestBody.channelId, questionId: requestBody.questionId },
-        UpdateExpression: "SET answers = answers + :value",
+        UpdateExpression: "SET totalAnswers = totalAnswers + :value",
         ExpressionAttributeValues: {
           ":value": 1,
         },

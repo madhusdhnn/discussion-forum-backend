@@ -15,9 +15,24 @@ const stackProps = {
   },
 };
 
-const apiStack = new ApiStack(app, "DiscussionForumApiStack", stackProps);
-const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", stackProps);
+const apiStack = new ApiStack(app, "DiscussionForumApiStack", {
+  ...stackProps,
+  description: "This stack creates an API Gateway REST API (with default configurations) for Discussion Forum backend",
+});
+const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", {
+  ...stackProps,
+  description: "This stack creates DynamoDB tables and index for Discussion Forum backend",
+});
 
-new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, stackProps);
-new QuestionsStack(app, "QuestionsStack", apiStack, dataStoreStack, stackProps);
-new AnswersStack(app, "AnswersStack", apiStack, dataStoreStack, stackProps);
+new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, {
+  ...stackProps,
+  description: "This stack creates the Lambda functions for Channel APIs",
+});
+new QuestionsStack(app, "QuestionsStack", apiStack, dataStoreStack, {
+  ...stackProps,
+  description: "This stack creates the Lambda functions for Question APIs",
+});
+new AnswersStack(app, "AnswersStack", apiStack, dataStoreStack, {
+  ...stackProps,
+  description: "This stack creates the Lambda functions for Answer APIs",
+});

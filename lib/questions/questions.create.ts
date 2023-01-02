@@ -1,7 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IChannel } from "../models/Channel";
-import { IQuestion, IQuestionRequest, IQuestionResponse } from "../models/Question";
+import { IQuestion, IQuestionCreateResponse, IQuestionRequest } from "../models/Question";
 import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, generateSecureRandomId } from "../utils";
 
 const ddb = new DocumentClient();
@@ -37,8 +37,8 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       channelId: questionRequest.channelId,
       question: questionRequest.question,
       questionId: questionId,
-      voteCount: 0,
-      answers: 0,
+      totalVotes: 0,
+      totalAnswers: 0,
       createdAt: nowTime,
       updatedAt: nowTime,
     };
@@ -54,14 +54,14 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .update({
         TableName: process.env.CHANNELS_TABLE_NAME as string,
         Key: { channelId: questionRequest.channelId },
-        UpdateExpression: "SET questions = questions + :value",
+        UpdateExpression: "SET totalQuestions = totalQuestions + :value",
         ExpressionAttributeValues: {
           ":value": 1,
         },
       })
       .promise();
 
-    const response: IQuestionResponse = {
+    const response: IQuestionCreateResponse = {
       questionId: dbData.questionId,
       question: dbData.question,
       createdAt: new Date(dbData.createdAt),

@@ -1,4 +1,4 @@
-import { Stack, StackProps } from "aws-cdk-lib";
+import { Fn, Stack, StackProps } from "aws-cdk-lib";
 import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
@@ -39,10 +39,37 @@ export class QuestionsStack extends Stack {
     dataStoreStack.channelsTable.grantReadData(voteQuestionFunction);
     dataStoreStack.questionsTable.grantWriteData(voteQuestionFunction);
 
+    const getAllQuestionsFunction = new NodejsFunction(this, "get-all-questions-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "questions.get-all.ts"),
+      handler: "handler",
+      environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
+        QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
+        QUESTIONS_CREATED_TIMESTAMP_INDEX: Fn.importValue(dataStoreStack.questionCreatedTimeStampIdxOutputName),
+      },
+    });
+
+    dataStoreStack.channelsTable.grantReadData(getAllQuestionsFunction);
+    dataStoreStack.questionsTable.grantReadData(getAllQuestionsFunction);
+
+    const getQuestionFunction = new NodejsFunction(this, "get-question-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "questions.get.ts"),
+      handler: "handler",
+      environment: {
+        QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
+      },
+    });
+
+    dataStoreStack.questionsTable.grantReadData(getQuestionFunction);
+
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
+    apiResource.addMethod("GET", new LambdaIntegration(getAllQuestionsFunction, { proxy: true }));
 
     const questionResource = apiResource.addResource("{questionId}");
+    questionResource.addMethod("GET", new LambdaIntegration(getQuestionFunction, { proxy: true }));
     questionResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }));
   }
 }

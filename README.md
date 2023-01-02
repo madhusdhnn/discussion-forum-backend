@@ -17,5 +17,9 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 - [ ] Integrate Cognito User pool
 - [ ] Authorize APIs based on Cognito Roles (Cognito/ Lambda authorizers)
+- [ ] Update some/ all lambdas to check access to channel for user from Cognito auth token
 - [ ] Get Channel by ID - Perhaps use Elasticache or DAX
 - [ ] Client/ Server Error response segregation
+- [ ] Support GET (all & filter) APIs
+- [ ] Support DELETE APIs
+- [ ] Client input validation (400 response)

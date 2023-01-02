@@ -14,7 +14,7 @@ export interface IAnswerBase {
 export interface IAnswer extends IAnswerBase {
   isAccepted: boolean;
   postedBy: string;
-  voteCount: number;
+  totalVotes: number;
   createdAt: number;
   updatedAt: number;
 }

@@ -1,6 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
-import { IChannel } from "../models/Channel";
 import { buildErrorResult, buildSuccessResult } from "../utils";
 
 const ddb = new DynamoDB.DocumentClient();

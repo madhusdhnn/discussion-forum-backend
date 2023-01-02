@@ -37,7 +37,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .update({
         TableName: process.env.QUESTIONS_TABLE_NAME as string,
         Key: { channelId: requestBody.channelId, questionId: questionId },
-        UpdateExpression: "SET voteCount = voteCount " + getVoteOperator(voteOp) + " :value, updatedAt = :updatedAt",
+        UpdateExpression: "SET totalVotes = totalVotes " + getVoteOperator(voteOp) + " :value, updatedAt = :updatedAt",
         ExpressionAttributeValues: {
           ":value": 1,
           ":updatedAt": new Date().getTime(),

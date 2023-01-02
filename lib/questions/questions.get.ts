@@ -1,0 +1,42 @@
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
+import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IQuestion, IQuestionResponse } from "../models/Question";
+import { buildErrorResult, buildSuccessResult } from "../utils";
+
+const ddb = new DocumentClient();
+
+exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
+  try {
+    const questionId = event.pathParameters?.["questionId"];
+    const channelId = event.queryStringParameters?.["channelId"];
+
+    const result = await ddb
+      .get({
+        TableName: process.env.QUESTIONS_TABLE_NAME as string,
+        Key: { channelId: channelId, questionId: questionId },
+      })
+      .promise();
+
+    if (!result.Item) {
+      return buildErrorResult(null, 404);
+    }
+
+    const question = result.Item as IQuestion;
+
+    const response: IQuestionResponse = {
+      channelId: question.channelId,
+      questionId: question.questionId,
+      question: question.question,
+      owner: question.owner,
+      totalAnswers: question.totalAnswers,
+      totalVotes: question.totalVotes,
+      createdAt: new Date(question.createdAt as number),
+      updatedAt: new Date(question.updatedAt as number),
+    };
+
+    return buildSuccessResult(response);
+  } catch (e: any) {
+    console.log(e);
+    return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
+  }
+};
