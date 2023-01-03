@@ -1,5 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { DEFAULT_ERROR_MESSAGE, isAppError } from "../models/Errors";
 import { IQuestion, IQuestionResponse } from "../models/Question";
 import { buildErrorResult, buildSuccessResult } from "../utils";
 
@@ -36,7 +37,11 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response);
   } catch (e: any) {
-    console.log(e);
-    return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
+    console.error(e);
+    if (isAppError(e)) {
+      const { message, name } = e;
+      return buildErrorResult({ message, name }, e.statusCode);
+    }
+    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE }, 500);
   }
 };

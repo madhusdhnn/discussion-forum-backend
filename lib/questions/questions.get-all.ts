@@ -1,5 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { DEFAULT_ERROR_MESSAGE, isAppError, PropertyRequiredError } from "../models/Errors";
 import { IPagination } from "../models/Pagination";
 import { IQuestionResponse, IQuestionsPagedResponse } from "../models/Question";
 import { base64Decode, base64Encode, buildErrorResult, buildSuccessResult } from "../utils";
@@ -10,13 +11,9 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   try {
     const channelId = event.queryStringParameters?.["channelId"];
     if (!channelId) {
-      throw new Error("Paramter missing: (Required parameter channelId is null or undefined)");
+      throw new PropertyRequiredError("Paramter missing: (Required parameter channelId is null or undefined)");
     }
     const count = parseInt(event.queryStringParameters?.["count"] as string) || 10;
-    const nextEvaluationKey = event.queryStringParameters?.["nextEvaluationKey"];
-
-    const startDateTime = event.queryStringParameters?.["startDateTime"];
-    const endDateTime = event.queryStringParameters?.["endDateTime"];
 
     const dbParams: any = {
       TableName: process.env.QUESTIONS_TABLE_NAME as string,
@@ -28,17 +25,24 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       },
     };
 
+    const nextEvaluationKey = event.queryStringParameters?.["nextEvaluationKey"];
+
+    const startDateTime = event.queryStringParameters?.["startDateTime"];
+    const endDateTime = event.queryStringParameters?.["endDateTime"];
+
     if (nextEvaluationKey) {
       dbParams.ExclusiveStartKey = JSON.parse(base64Decode(nextEvaluationKey));
     }
 
     if (startDateTime) {
       if (!endDateTime) {
-        throw new Error("Parameter missing: (endDateTime is a required parameter, when startDateTime is provided)");
+        throw new PropertyRequiredError(
+          "Parameter missing: (endDateTime is a required parameter, when startDateTime is provided)"
+        );
       }
 
       // As createdAt attribute is sortKey of LSI, KeyConditionExpression must be used instead of FilterExpression
-      dbParams.KeyConditionExpression += " AND createdAt between :startDateTime AND :endDateTime";
+      dbParams.KeyConditionExpression += " AND createdAt BETWEEN :startDateTime AND :endDateTime";
       dbParams.ExpressionAttributeValues = Object.assign({}, dbParams.ExpressionAttributeValues, {
         ":startDateTime": new Date(startDateTime).getTime(),
         ":endDateTime": new Date(endDateTime).getTime(),
@@ -91,7 +95,11 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response);
   } catch (e: any) {
-    console.log(e);
-    return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
+    console.error(e);
+    if (isAppError(e)) {
+      const { message, name } = e;
+      return buildErrorResult({ message, name }, e.statusCode);
+    }
+    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE }, 500);
   }
 };

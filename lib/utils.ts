@@ -1,6 +1,7 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { randomBytes } from "crypto";
 import { IChannel } from "./models/Channel";
+import { AccessDeniedError, IllegalArgumentError } from "./models/Errors";
 import { VoteOpType } from "./models/Vote";
 
 export const buildSuccessResult = <T>(
@@ -36,7 +37,9 @@ export const ensureChannelAccessForUser = (channel: IChannel, user: string) => {
     channel.visibility === "PRIVATE" &&
     !channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())
   ) {
-    throw new Error(`Access denied: (User - ${user} does not have access to the channel - ${channel.name})`);
+    throw new AccessDeniedError(
+      `Access denied: (User - ${user} does not have access to the channel - ${channel.name})`
+    );
   }
 };
 
@@ -47,7 +50,7 @@ export const getVoteOperator = (voteOp: VoteOpType): string => {
     case "DOWN":
       return "-";
     default:
-      throw new Error("Vote operation type is null or undefined");
+      throw new IllegalArgumentError("Vote operation type is null or undefined");
   }
 };
 

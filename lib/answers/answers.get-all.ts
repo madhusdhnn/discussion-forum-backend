@@ -1,6 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IAnswerResponse, IAnswersPagedResponse } from "../models/Answer";
+import { DEFAULT_ERROR_MESSAGE, isAppError, PropertyRequiredError } from "../models/Errors";
 import { IPagination } from "../models/Pagination";
 import { base64Decode, base64Encode, buildErrorResult, buildSuccessResult } from "../utils";
 
@@ -12,7 +13,9 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const questionId = event.queryStringParameters?.["questionId"];
 
     if (!channelId || !questionId) {
-      throw new Error("Paramter missing: (Required parameters channelId and/ or questionId is null or undefined)");
+      throw new PropertyRequiredError(
+        "Paramter missing: (Required parameters channelId and/ or questionId is null or undefined)"
+      );
     }
 
     const count = parseInt(event.queryStringParameters?.["count"] as string) || 10;
@@ -78,7 +81,11 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response);
   } catch (e: any) {
-    console.log(e);
-    return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
+    console.error(e);
+    if (isAppError(e)) {
+      const { message, name } = e;
+      return buildErrorResult({ message, name }, e.statusCode);
+    }
+    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE }, 500);
   }
 };

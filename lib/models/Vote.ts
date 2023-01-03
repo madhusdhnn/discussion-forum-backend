@@ -1,3 +1,5 @@
+import { ValidationError } from "./Errors";
+
 export const VoteOp = {
   Up: "UP",
   Down: "DOWN",
@@ -12,7 +14,7 @@ export const parseVoteOp = (voteOpStr: string): VoteOpType => {
 
   const result = Object.values(VoteOp).find((v) => v.toLowerCase() === voteOpStr.toLowerCase());
   if (!result) {
-    throw new Error(`Invalid vote operation: ${voteOpStr}`);
+    throw new ValidationError(`Invalid vote operation: ${voteOpStr}`);
   }
 
   return result;

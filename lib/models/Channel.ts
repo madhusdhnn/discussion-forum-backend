@@ -1,3 +1,4 @@
+import { IllegalArgumentError, ValidationError } from "./Errors";
 import { IPagedResponse } from "./Pagination";
 
 export const ChannelVisibility = {
@@ -49,12 +50,12 @@ export interface IChannelsPagedResponse extends IPagedResponse<IChannelResponse>
 
 export const parseChannelVisibility = (channelVisibilityStr: string): ChannelVisibilityType => {
   if (!channelVisibilityStr) {
-    throw new Error("Channel visibility is null or undefined");
+    throw new IllegalArgumentError("Channel visibility is null or undefined");
   }
 
   const result = Object.values(ChannelVisibility).find((ct) => ct.toLowerCase() === channelVisibilityStr.toLowerCase());
   if (!result) {
-    throw new Error(`Unsupported channel visibility: ${channelVisibilityStr}`);
+    throw new ValidationError(`Unsupported channel visibility: ${channelVisibilityStr}`);
   }
 
   return result;

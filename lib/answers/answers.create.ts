@@ -2,6 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IAnswer, IAnswerRequest, IAnswerSummaryResponse } from "../models/Answer";
 import { IChannel } from "../models/Channel";
+import { DEFAULT_ERROR_MESSAGE, isAppError, NotFoundError } from "../models/Errors";
 import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser, generateSecureRandomId } from "../utils";
 
 const ddb = new DocumentClient();
@@ -24,7 +25,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const channel = getChannelResult.Item as IChannel;
 
     if (!channel) {
-      throw new Error(`No channel found: (Channel ID: ${requestBody.channelId})`);
+      throw new NotFoundError(`No channel found: (Channel ID: ${requestBody.channelId})`);
     }
 
     ensureChannelAccessForUser(channel, requestBody.postedBy);
@@ -65,7 +66,11 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     return buildSuccessResult(response, 201);
   } catch (e: any) {
-    console.log(e);
-    return buildErrorResult({ message: e.message || "Something went wrong!" }, 500);
+    console.error(e);
+    if (isAppError(e)) {
+      const { message, name } = e;
+      return buildErrorResult({ message, name }, e.statusCode);
+    }
+    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE }, 500);
   }
 };
