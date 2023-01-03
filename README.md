@@ -1,8 +1,10 @@
-# Welcome to your CDK TypeScript project
+# DISCUSSION FORUM BACKEND
 
-This is a blank project for CDK development with TypeScript.
+This repo contains infrastructure setup using AWS CDK and AWS lambda function handlers for discussion forum backend. Following AWS services are used.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+1. API Gateway (REST API)
+2. Lambda (Node JS)
+3. DynamoDB
 
 ## Useful commands
 
