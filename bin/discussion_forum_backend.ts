@@ -2,10 +2,10 @@
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
 import { AnswersStack } from "../lib/answers/answers.stack";
-import { ApiStack } from "../lib/api/api-stack";
-import { AuthStack } from "../lib/auth/auth-stack";
+import { ApiStack } from "../lib/api/api.stack";
+import { AuthStack } from "../lib/auth/auth.stack";
 import { ChannelsStack } from "../lib/channels/channels.stack";
-import { DataStoreStack } from "../lib/datastore/datastore-stack";
+import { DataStoreStack } from "../lib/datastore/datastore.stack";
 import { QuestionsStack } from "../lib/questions/questions.stack";
 
 const app = new cdk.App();

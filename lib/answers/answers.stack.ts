@@ -3,8 +3,8 @@ import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { ApiStack } from "../api/api-stack";
-import { DataStoreStack } from "../datastore/datastore-stack";
+import { ApiStack } from "../api/api.stack";
+import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 const apiPath = "answers";
