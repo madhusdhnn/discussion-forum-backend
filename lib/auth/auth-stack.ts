@@ -53,7 +53,7 @@ export class AuthStack extends Stack {
 
     const postConfirmTriggerFunction = new NodejsFunction(this, "cognito-post-confirm-trigger-function", {
       runtime: Runtime.NODEJS_14_X,
-      entry: path.join(__dirname, "../", "cognito-triggers", "triggers.post-confirm.ts"),
+      entry: path.join(__dirname, "auth.post-confirm.ts"),
       handler: "handler",
     });
 
