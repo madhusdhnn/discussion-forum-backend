@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import * as cdk from "aws-cdk-lib";
 import "source-map-support/register";
+import { AnswersStack } from "../lib/answers/answers.stack";
 import { ApiStack } from "../lib/api/api-stack";
+import { AuthStack } from "../lib/auth/auth-stack";
 import { ChannelsStack } from "../lib/channels/channels.stack";
 import { DataStoreStack } from "../lib/datastore/datastore-stack";
 import { QuestionsStack } from "../lib/questions/questions.stack";
-import { AnswersStack } from "../lib/answers/answers.stack";
 
 const app = new cdk.App();
 const stackProps = {
@@ -22,6 +23,11 @@ const apiStack = new ApiStack(app, "DiscussionForumApiStack", {
 const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", {
   ...stackProps,
   description: "This stack creates DynamoDB tables and index for Discussion Forum backend",
+});
+
+new AuthStack(app, "AuthStack", {
+  ...stackProps,
+  description: "This stack creates Cognito user pool and an app client",
 });
 
 new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, {

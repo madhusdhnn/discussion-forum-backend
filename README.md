@@ -25,3 +25,6 @@ This repo contains infrastructure setup using AWS CDK and AWS lambda function ha
 - [x] Support GET (all & filter) APIs
 - [ ] Support DELETE APIs
 - [x] Client input validation (400 response)
+- [ ] Move CFN output names to common file
+- [ ] Create IAM roles & policies for resources (this should elimiate dependency of stacks. Also try to replace with CFN Outputs)
+- [ ] Create Cognito Groups with proper IAM permissions (eg: Admin - full access, user - limited R/ W access)

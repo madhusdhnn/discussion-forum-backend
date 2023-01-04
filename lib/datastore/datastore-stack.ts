@@ -8,6 +8,7 @@ export class DataStoreStack extends Stack {
   readonly channelsTable: Table;
   readonly questionsTable: Table;
   readonly answersTable: Table;
+  readonly usersTable: Table;
 
   readonly questionCreatedTimeStampIdxOutputName = "DiscussionForumDataStoreStack:QctIndex";
   readonly answersVoteIdxOutputName = "DiscussionForumDateStoreStack:avIndex";
@@ -53,6 +54,12 @@ export class DataStoreStack extends Stack {
     this.answersTable.addLocalSecondaryIndex({
       indexName: answersVoteIdxOutput.value,
       sortKey: { name: "totalVotes", type: AttributeType.NUMBER },
+    });
+
+    this.usersTable = new Table(this, "users-table", {
+      partitionKey: { name: "userId", type: AttributeType.STRING },
+      tableName: "Users",
+      removalPolicy: RemovalPolicy.DESTROY,
     });
   }
 }
