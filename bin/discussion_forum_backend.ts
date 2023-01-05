@@ -25,7 +25,7 @@ const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", 
   description: "This stack creates DynamoDB tables and index for Discussion Forum backend",
 });
 
-new AuthStack(app, "AuthStack", {
+new AuthStack(app, "AuthStack", dataStoreStack, {
   ...stackProps,
   description: "This stack creates Cognito user pool and an app client",
 });

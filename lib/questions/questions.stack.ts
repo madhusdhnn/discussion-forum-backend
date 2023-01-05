@@ -4,6 +4,7 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { ApiStack } from "../api/api.stack";
+import { questionCreatedTimeStampIdxOutputName } from "../cdk-commons";
 import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
@@ -46,7 +47,7 @@ export class QuestionsStack extends Stack {
       environment: {
         CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
-        QUESTIONS_CREATED_TIMESTAMP_INDEX: Fn.importValue(dataStoreStack.questionCreatedTimeStampIdxOutputName),
+        QUESTIONS_CREATED_TIMESTAMP_INDEX: Fn.importValue(questionCreatedTimeStampIdxOutputName),
       },
     });
 

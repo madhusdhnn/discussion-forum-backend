@@ -1,6 +1,7 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
 import { AttributeType, CfnTable, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
+import { answersVoteIdxOutputName, questionCreatedTimeStampIdxOutputName } from "../cdk-commons";
 
 export type LocalSecondaryIndexListType = Array<CfnTable.LocalSecondaryIndexProperty> | undefined;
 
@@ -9,9 +10,6 @@ export class DataStoreStack extends Stack {
   readonly questionsTable: Table;
   readonly answersTable: Table;
   readonly usersTable: Table;
-
-  readonly questionCreatedTimeStampIdxOutputName = "DiscussionForumDataStoreStack:QctIndex";
-  readonly answersVoteIdxOutputName = "DiscussionForumDateStoreStack:avIndex";
 
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
@@ -31,7 +29,7 @@ export class DataStoreStack extends Stack {
 
     const questionsCreatedTimeStampIdxOutput = new CfnOutput(this, "questions-created-timestamp-index", {
       value: "QuestionsCreatedTimestampIndex",
-      exportName: this.questionCreatedTimeStampIdxOutputName,
+      exportName: questionCreatedTimeStampIdxOutputName,
     });
 
     this.questionsTable.addLocalSecondaryIndex({
@@ -48,7 +46,7 @@ export class DataStoreStack extends Stack {
 
     const answersVoteIdxOutput = new CfnOutput(this, "answers-vote-index", {
       value: "AnswersVoteIndex",
-      exportName: this.answersVoteIdxOutputName,
+      exportName: answersVoteIdxOutputName,
     });
 
     this.answersTable.addLocalSecondaryIndex({

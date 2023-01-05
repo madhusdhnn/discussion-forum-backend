@@ -4,6 +4,7 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { ApiStack } from "../api/api.stack";
+import { answersVoteIdxOutputName } from "../cdk-commons";
 import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
@@ -76,7 +77,7 @@ export class AnswersStack extends Stack {
       environment: {
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
         ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
-        ANSWERS_VOTE_INDEX: Fn.importValue(dataStoreStack.answersVoteIdxOutputName),
+        ANSWERS_VOTE_INDEX: Fn.importValue(answersVoteIdxOutputName),
       },
     });
 
