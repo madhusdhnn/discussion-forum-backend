@@ -1,11 +1,13 @@
 import { Stack, StackProps } from "aws-cdk-lib";
-import { RestApi } from "aws-cdk-lib/aws-apigateway";
+import { Authorizer, CognitoUserPoolsAuthorizer, RestApi } from "aws-cdk-lib/aws-apigateway";
 import { Construct } from "constructs";
+import { AuthStack } from "../auth/auth.stack";
 
 export class ApiStack extends Stack {
   readonly restApi: RestApi;
+  readonly dfUserPoolAuthorizer: Authorizer;
 
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, authStack: AuthStack, props?: StackProps) {
     super(scope, id, props);
 
     this.restApi = new RestApi(this, "discussion-forum-rest-api", {
@@ -14,6 +16,10 @@ export class ApiStack extends Stack {
       deployOptions: {
         stageName: "dev",
       },
+    });
+
+    this.dfUserPoolAuthorizer = new CognitoUserPoolsAuthorizer(this, "df-cognito-user-pool-authorizer", {
+      cognitoUserPools: [authStack.userPool],
     });
   }
 }

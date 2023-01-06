@@ -16,18 +16,19 @@ const stackProps = {
   },
 };
 
-const apiStack = new ApiStack(app, "DiscussionForumApiStack", {
-  ...stackProps,
-  description: "This stack creates an API Gateway REST API (with default configurations) for Discussion Forum backend",
-});
 const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", {
   ...stackProps,
   description: "This stack creates DynamoDB tables and index for Discussion Forum backend",
 });
 
-new AuthStack(app, "AuthStack", dataStoreStack, {
+const authStack = new AuthStack(app, "AuthStack", dataStoreStack, {
   ...stackProps,
   description: "This stack creates Cognito user pool and an app client",
+});
+
+const apiStack = new ApiStack(app, "DiscussionForumApiStack", authStack, {
+  ...stackProps,
+  description: "This stack creates an API Gateway REST API (with default configurations) for Discussion Forum backend",
 });
 
 new ChannelsStack(app, "ChannelsStack", apiStack, dataStoreStack, {

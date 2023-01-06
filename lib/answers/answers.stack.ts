@@ -85,12 +85,24 @@ export class AnswersStack extends Stack {
     dataStoreStack.answersTable.grantReadData(getAllAnswersFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addMethod("GET", new LambdaIntegration(getAllAnswersFunction, { proxy: true }));
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    apiResource.addMethod("GET", new LambdaIntegration(getAllAnswersFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
 
     const answerResource = apiResource.addResource("{answerId}");
-    answerResource.addMethod("PUT", new LambdaIntegration(updateFunction, { proxy: true }));
-    answerResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteAnswerFunction, { proxy: true }));
-    answerResource.addResource("accept").addMethod("PUT", new LambdaIntegration(acceptAnswerFunction, { proxy: true }));
+    answerResource.addMethod("PUT", new LambdaIntegration(updateFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    answerResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteAnswerFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    answerResource
+      .addResource("accept")
+      .addMethod("PUT", new LambdaIntegration(acceptAnswerFunction, { proxy: true }), {
+        authorizer: apiStack.dfUserPoolAuthorizer,
+      });
   }
 }

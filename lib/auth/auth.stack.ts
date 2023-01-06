@@ -14,7 +14,7 @@ import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 export class AuthStack extends Stack {
-  readonly userPool;
+  readonly userPool: UserPool;
 
   constructor(scope: Construct, id: string, dataStoreStack: DataStoreStack, props: StackProps) {
     super(scope, id, props);

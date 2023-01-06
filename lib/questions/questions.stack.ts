@@ -66,11 +66,21 @@ export class QuestionsStack extends Stack {
     dataStoreStack.questionsTable.grantReadData(getQuestionFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addMethod("GET", new LambdaIntegration(getAllQuestionsFunction, { proxy: true }));
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    apiResource.addMethod("GET", new LambdaIntegration(getAllQuestionsFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
 
     const questionResource = apiResource.addResource("{questionId}");
-    questionResource.addMethod("GET", new LambdaIntegration(getQuestionFunction, { proxy: true }));
-    questionResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }));
+    questionResource.addMethod("GET", new LambdaIntegration(getQuestionFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    questionResource
+      .addResource("vote")
+      .addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }), {
+        authorizer: apiStack.dfUserPoolAuthorizer,
+      });
   }
 }

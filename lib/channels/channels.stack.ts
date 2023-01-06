@@ -58,11 +58,19 @@ export class ChannelsStack extends Stack {
     dataStoreStack.channelsTable.grantReadData(getAllChannelsFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addMethod("GET", new LambdaIntegration(getAllChannelsFunction, { proxy: true }));
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    apiResource.addMethod("GET", new LambdaIntegration(getAllChannelsFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
 
     const channelResource = apiResource.addResource("{channelId}");
-    channelResource.addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }));
-    channelResource.addMethod("GET", new LambdaIntegration(getFunction, { proxy: true }));
+    channelResource.addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
+    channelResource.addMethod("GET", new LambdaIntegration(getFunction, { proxy: true }), {
+      authorizer: apiStack.dfUserPoolAuthorizer,
+    });
   }
 }
