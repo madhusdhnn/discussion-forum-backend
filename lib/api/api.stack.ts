@@ -1,13 +1,16 @@
-import { Stack, StackProps } from "aws-cdk-lib";
-import { Authorizer, CognitoUserPoolsAuthorizer, RestApi } from "aws-cdk-lib/aws-apigateway";
+import { Duration, Fn, Stack, StackProps } from "aws-cdk-lib";
+import { Authorizer, RestApi, TokenAuthorizer } from "aws-cdk-lib/aws-apigateway";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { AuthStack } from "../auth/auth.stack";
+import { dfAppClientOutputName, dfUserPoolIdOutputName } from "../cdk-commons";
+import path = require("path");
 
 export class ApiStack extends Stack {
   readonly restApi: RestApi;
-  readonly dfUserPoolAuthorizer: Authorizer;
+  readonly dfTokenAuthorizer: Authorizer;
 
-  constructor(scope: Construct, id: string, authStack: AuthStack, props?: StackProps) {
+  constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
     this.restApi = new RestApi(this, "discussion-forum-rest-api", {
@@ -18,8 +21,20 @@ export class ApiStack extends Stack {
       },
     });
 
-    this.dfUserPoolAuthorizer = new CognitoUserPoolsAuthorizer(this, "df-cognito-user-pool-authorizer", {
-      cognitoUserPools: [authStack.userPool],
+    const tokenAuthorizerFunction = new NodejsFunction(this, "df-token-authorizer-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "authorizers", "api.token-authorizer.ts"),
+      handler: "handler",
+      environment: {
+        USER_POOL_ID: Fn.importValue(dfUserPoolIdOutputName),
+        DF_WEB_APP_CLIENT_ID: Fn.importValue(dfAppClientOutputName),
+      },
+    });
+
+    this.dfTokenAuthorizer = new TokenAuthorizer(this, "df-token-authorizer", {
+      handler: tokenAuthorizerFunction,
+      authorizerName: "DisucssionForumTokenAuthorizer",
+      resultsCacheTtl: Duration.millis(0),
     });
   }
 }

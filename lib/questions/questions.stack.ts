@@ -67,20 +67,20 @@ export class QuestionsStack extends Stack {
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
-      authorizer: apiStack.dfUserPoolAuthorizer,
+      authorizer: apiStack.dfTokenAuthorizer,
     });
     apiResource.addMethod("GET", new LambdaIntegration(getAllQuestionsFunction, { proxy: true }), {
-      authorizer: apiStack.dfUserPoolAuthorizer,
+      authorizer: apiStack.dfTokenAuthorizer,
     });
 
     const questionResource = apiResource.addResource("{questionId}");
     questionResource.addMethod("GET", new LambdaIntegration(getQuestionFunction, { proxy: true }), {
-      authorizer: apiStack.dfUserPoolAuthorizer,
+      authorizer: apiStack.dfTokenAuthorizer,
     });
     questionResource
       .addResource("vote")
       .addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }), {
-        authorizer: apiStack.dfUserPoolAuthorizer,
+        authorizer: apiStack.dfTokenAuthorizer,
       });
   }
 }

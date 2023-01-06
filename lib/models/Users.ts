@@ -1,11 +1,10 @@
 export const Roles = {
   SuperAdmin: "SUPER_ADMIN",
   Admin: "ADMIN",
-  Moderator: "MODERATOR",
   User: "USER",
 } as const;
 
-export type RoleStrings = typeof Roles[keyof typeof Roles];
+export type RoleStrings = typeof Roles[keyof typeof Roles] | undefined;
 
 export interface IUser {
   userId: string;

@@ -21,12 +21,12 @@ const dataStoreStack = new DataStoreStack(app, "DiscussionForumDataStoreStack", 
   description: "This stack creates DynamoDB tables and index for Discussion Forum backend",
 });
 
-const authStack = new AuthStack(app, "AuthStack", dataStoreStack, {
+new AuthStack(app, "AuthStack", dataStoreStack, {
   ...stackProps,
   description: "This stack creates Cognito user pool and an app client",
 });
 
-const apiStack = new ApiStack(app, "DiscussionForumApiStack", authStack, {
+const apiStack = new ApiStack(app, "DiscussionForumApiStack", {
   ...stackProps,
   description: "This stack creates an API Gateway REST API (with default configurations) for Discussion Forum backend",
 });
