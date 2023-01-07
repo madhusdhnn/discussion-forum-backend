@@ -8,6 +8,8 @@ export type RoleStrings = typeof Roles[keyof typeof Roles] | undefined;
 
 export interface IUser {
   userId: string;
+  email: string;
+  cognitoSub: string;
   role: RoleStrings;
   firstName: string;
   lastName: string;

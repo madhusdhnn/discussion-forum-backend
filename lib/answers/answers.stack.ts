@@ -4,14 +4,21 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { ApiStack } from "../api/api.stack";
-import { answersVoteIdxOutputName } from "../cdk-commons";
+import { CdkCommons } from "../cdk-commons";
 import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 const apiPath = "answers";
 
 export class AnswersStack extends Stack {
-  constructor(scope: Construct, id: string, apiStack: ApiStack, dataStoreStack: DataStoreStack, props?: StackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    apiStack: ApiStack,
+    dataStoreStack: DataStoreStack,
+    commons: CdkCommons,
+    props?: StackProps
+  ) {
     super(scope, id, props);
 
     const postFunction = new NodejsFunction(this, "create-answer-function", {
@@ -77,7 +84,7 @@ export class AnswersStack extends Stack {
       environment: {
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
         ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
-        ANSWERS_VOTE_INDEX: Fn.importValue(answersVoteIdxOutputName),
+        ANSWERS_VOTE_INDEX: Fn.importValue(commons.answersVoteIdxOutputName),
       },
     });
 

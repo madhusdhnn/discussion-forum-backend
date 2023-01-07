@@ -1,6 +1,8 @@
 import { Context, PostConfirmationConfirmSignUpTriggerEvent } from "aws-lambda";
 import { CognitoIdentityServiceProvider } from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IUser, Roles } from "../models/Users";
+import { generateSecureRandomId } from "../utils";
 
 const cognito = new CognitoIdentityServiceProvider();
 const ddb = new DocumentClient();
@@ -11,10 +13,13 @@ exports.handler = async (
 ): Promise<PostConfirmationConfirmSignUpTriggerEvent> => {
   console.log(JSON.stringify(event), "Event");
 
-  /* const nowTime = new Date().getTime();
+  const { userAttributes } = event.request;
+  const nowTime = new Date().getTime();
 
   const dbData: IUser = {
-    userId: email,
+    userId: generateSecureRandomId(4),
+    cognitoSub: userAttributes.sub,
+    email: userAttributes.email,
     role: Roles.User,
     firstName: userAttributes["custom:firstName"],
     lastName: userAttributes["custom:lastName"],
@@ -27,15 +32,27 @@ exports.handler = async (
       TableName: process.env.USERS_TABLE_NAME as string,
       Item: dbData,
     })
-    .promise(); */
-  /* 
+    .promise();
+
   await cognito
     .adminAddUserToGroup({
       GroupName: Roles.User,
-      Username: email,
+      Username: event.userName,
       UserPoolId: event.userPoolId,
     })
-    .promise(); */
+    .promise();
 
+  await cognito
+    .adminUpdateUserAttributes({
+      Username: event.userName,
+      UserPoolId: event.userPoolId,
+      UserAttributes: [
+        {
+          Name: "custom:userId",
+          Value: dbData.userId,
+        },
+      ],
+    })
+    .promise();
   return event;
 };

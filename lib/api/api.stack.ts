@@ -3,14 +3,14 @@ import { Authorizer, RestApi, TokenAuthorizer } from "aws-cdk-lib/aws-apigateway
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { dfAppClientOutputName, dfUserPoolIdOutputName } from "../cdk-commons";
+import { CdkCommons } from "../cdk-commons";
 import path = require("path");
 
 export class ApiStack extends Stack {
   readonly restApi: RestApi;
   readonly dfTokenAuthorizer: Authorizer;
 
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, commons: CdkCommons, props?: StackProps) {
     super(scope, id, props);
 
     this.restApi = new RestApi(this, "discussion-forum-rest-api", {
@@ -26,8 +26,8 @@ export class ApiStack extends Stack {
       entry: path.join(__dirname, "authorizers", "api.token-authorizer.ts"),
       handler: "handler",
       environment: {
-        USER_POOL_ID: Fn.importValue(dfUserPoolIdOutputName),
-        DF_WEB_APP_CLIENT_ID: Fn.importValue(dfAppClientOutputName),
+        USER_POOL_ID: Fn.importValue(commons.dfUserPoolIdOutputName),
+        DF_WEB_APP_CLIENT_ID: Fn.importValue(commons.dfAppClientOutputName),
       },
     });
 

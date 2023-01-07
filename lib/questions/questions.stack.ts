@@ -4,14 +4,21 @@ import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 import { ApiStack } from "../api/api.stack";
-import { questionCreatedTimeStampIdxOutputName } from "../cdk-commons";
+import { CdkCommons } from "../cdk-commons";
 import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 const apiPath = "questions";
 
 export class QuestionsStack extends Stack {
-  constructor(scope: Construct, id: string, apiStack: ApiStack, dataStoreStack: DataStoreStack, props?: StackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    apiStack: ApiStack,
+    dataStoreStack: DataStoreStack,
+    commons: CdkCommons,
+    props?: StackProps
+  ) {
     super(scope, id, props);
 
     const postFunction = new NodejsFunction(this, "create-question-function", {
@@ -47,7 +54,7 @@ export class QuestionsStack extends Stack {
       environment: {
         CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
-        QUESTIONS_CREATED_TIMESTAMP_INDEX: Fn.importValue(questionCreatedTimeStampIdxOutputName),
+        QUESTIONS_CREATED_TIMESTAMP_INDEX: Fn.importValue(commons.questionCreatedTimeStampIdxOutputName),
       },
     });
 
