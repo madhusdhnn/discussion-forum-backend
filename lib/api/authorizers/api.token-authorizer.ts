@@ -3,7 +3,6 @@ import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { APIGatewayTokenAuthorizerEvent, AuthResponse, Statement } from "aws-lambda";
 
 import { Roles, RoleStrings } from "../../models/Users";
-import { generateSecureRandomId } from "../../utils";
 
 const userPoolId = process.env.USER_POOL_ID as string;
 const dfWebAppClientId = process.env.DF_WEB_APP_CLIENT_ID as string;
@@ -21,7 +20,7 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
   }
 
   return {
-    Sid: "Sid" + generateSecureRandomId(4),
+    Sid: "DiscussionForumApiAccess",
     Effect: effect,
     Action: "execute-api:Invoke",
     Resource: `arn:aws:execute-api:${process.env.AWS_REGION}:*:*`,
