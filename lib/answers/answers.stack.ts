@@ -3,14 +3,22 @@ import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { ApiStack } from "../api/api-stack";
-import { DataStoreStack } from "../datastore/datastore-stack";
+import { ApiStack } from "../api/api.stack";
+import { CdkCommons } from "../cdk-commons";
+import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 const apiPath = "answers";
 
 export class AnswersStack extends Stack {
-  constructor(scope: Construct, id: string, apiStack: ApiStack, dataStoreStack: DataStoreStack, props?: StackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    apiStack: ApiStack,
+    dataStoreStack: DataStoreStack,
+    commons: CdkCommons,
+    props?: StackProps
+  ) {
     super(scope, id, props);
 
     const postFunction = new NodejsFunction(this, "create-answer-function", {
@@ -76,7 +84,7 @@ export class AnswersStack extends Stack {
       environment: {
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
         ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
-        ANSWERS_VOTE_INDEX: Fn.importValue(dataStoreStack.answersVoteIdxOutputName),
+        ANSWERS_VOTE_INDEX: Fn.importValue(commons.answersVoteIdxOutputName),
       },
     });
 
@@ -84,12 +92,24 @@ export class AnswersStack extends Stack {
     dataStoreStack.answersTable.grantReadData(getAllAnswersFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addMethod("GET", new LambdaIntegration(getAllAnswersFunction, { proxy: true }));
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+    apiResource.addMethod("GET", new LambdaIntegration(getAllAnswersFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
 
     const answerResource = apiResource.addResource("{answerId}");
-    answerResource.addMethod("PUT", new LambdaIntegration(updateFunction, { proxy: true }));
-    answerResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteAnswerFunction, { proxy: true }));
-    answerResource.addResource("accept").addMethod("PUT", new LambdaIntegration(acceptAnswerFunction, { proxy: true }));
+    answerResource.addMethod("PUT", new LambdaIntegration(updateFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+    answerResource.addResource("vote").addMethod("PUT", new LambdaIntegration(voteAnswerFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+    answerResource
+      .addResource("accept")
+      .addMethod("PUT", new LambdaIntegration(acceptAnswerFunction, { proxy: true }), {
+        authorizer: apiStack.dfTokenAuthorizer,
+      });
   }
 }

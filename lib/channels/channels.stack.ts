@@ -3,8 +3,8 @@ import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import { ApiStack } from "../api/api-stack";
-import { DataStoreStack } from "../datastore/datastore-stack";
+import { ApiStack } from "../api/api.stack";
+import { DataStoreStack } from "../datastore/datastore.stack";
 import path = require("path");
 
 const apiPath = "channels";
@@ -58,11 +58,19 @@ export class ChannelsStack extends Stack {
     dataStoreStack.channelsTable.grantReadData(getAllChannelsFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);
-    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }));
-    apiResource.addMethod("GET", new LambdaIntegration(getAllChannelsFunction, { proxy: true }));
+    apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+    apiResource.addMethod("GET", new LambdaIntegration(getAllChannelsFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
 
     const channelResource = apiResource.addResource("{channelId}");
-    channelResource.addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }));
-    channelResource.addMethod("GET", new LambdaIntegration(getFunction, { proxy: true }));
+    channelResource.addMethod("PUT", new LambdaIntegration(addUserToChannelFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+    channelResource.addMethod("GET", new LambdaIntegration(getFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
   }
 }

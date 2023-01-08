@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
-import { DEFAULT_ERROR_MESSAGE, isAppError, PropertyRequiredError } from "../models/Errors";
+import { DEFAULT_ERROR_MESSAGE, isAppError, PropertyRequiredError, ValidationError } from "../models/Errors";
 import { IPagination } from "../models/Pagination";
 import { IQuestionResponse, IQuestionsPagedResponse } from "../models/Question";
 import { base64Decode, base64Encode, buildErrorResult, buildSuccessResult } from "../utils";
@@ -14,6 +14,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new PropertyRequiredError("Paramter missing: (Required parameter channelId is null or undefined)");
     }
     const count = parseInt(event.queryStringParameters?.["count"] as string) || 10;
+
+    if (count < 1) {
+      throw new ValidationError("Count must be greater than zero");
+    }
 
     const dbParams: any = {
       TableName: process.env.QUESTIONS_TABLE_NAME as string,
@@ -39,6 +43,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
         throw new PropertyRequiredError(
           "Parameter missing: (endDateTime is a required parameter, when startDateTime is provided)"
         );
+      }
+
+      if (+new Date(endDateTime) <= +new Date(startDateTime)) {
+        throw new ValidationError("EndDateTime must be after StartDateTime");
       }
 
       // As createdAt attribute is sortKey of LSI, KeyConditionExpression must be used instead of FilterExpression
