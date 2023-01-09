@@ -6,6 +6,18 @@ export const Roles = {
 
 export type RoleStrings = typeof Roles[keyof typeof Roles] | undefined;
 
+export interface IUserRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface IConfirmUserRequest {
+  email: string;
+  confirmationCode: string;
+}
+
 export interface IUser {
   userId: string;
   email: string;
