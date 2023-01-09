@@ -13,11 +13,12 @@ export class ApiStack extends Stack {
   constructor(scope: Construct, id: string, commons: CdkCommons, props?: StackProps) {
     super(scope, id, props);
 
+    const restApiStage = "dev";
     this.restApi = new RestApi(this, "discussion-forum-rest-api", {
       restApiName: "Discussion Forum REST API",
       description: "This is the API service for managing Discussion Forum backend like Channels, Posts, Replies, etc.",
       deployOptions: {
-        stageName: "dev",
+        stageName: restApiStage,
       },
     });
 
@@ -28,6 +29,9 @@ export class ApiStack extends Stack {
       environment: {
         USER_POOL_ID: Fn.importValue(commons.dfUserPoolIdOutputName),
         DF_WEB_APP_CLIENT_ID: Fn.importValue(commons.dfAppClientOutputName),
+        ACCOUNT_ID: Fn.ref("AWS::AccountId"),
+        REST_API_ID: this.restApi.restApiId,
+        REST_API_STAGE_NAME: restApiStage,
       },
     });
 

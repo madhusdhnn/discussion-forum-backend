@@ -9,6 +9,13 @@ const dfWebAppClientId = process.env.DF_WEB_APP_CLIENT_ID as string;
 
 const cognitoJwtVerifier = CognitoJwtVerifier.create({ userPoolId });
 
+const defaultDenyAllStatement: Statement = {
+  Sid: "DiscussionForumApiDefaultDeny",
+  Action: "execute-api:Invoke",
+  Effect: Effect.DENY,
+  Resource: "*",
+};
+
 const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statement => {
   const methodArnSections = methodArn.split(":");
   const resourcePathSpecifier = methodArnSections[5];
@@ -19,11 +26,13 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
     effect = role === "SUPER_ADMIN" || role === "ADMIN" ? Effect.ALLOW : Effect.DENY;
   }
 
+  const arn = `arn:aws:execute-api:${process.env.AWS_REGION}:${process.env.ACCOUNT_ID}:${process.env.REST_API_ID}`;
+
   return {
     Sid: "DiscussionForumApiAccess",
     Effect: effect,
     Action: "execute-api:Invoke",
-    Resource: `arn:aws:execute-api:${process.env.AWS_REGION}:*:*`,
+    Resource: `${arn}/${process.env.REST_API_STAGE_NAME}/*`,
   };
 };
 
@@ -49,15 +58,19 @@ exports.handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AuthRes
   const username = payload["cognito:username"] as string;
   const groups = payload["cognito:groups"] || [];
 
-  const role: RoleStrings = Object.values(Roles).find((_role) => groups.includes(_role));
+  const statements = Object.values(Roles)
+    .filter((_role) => groups.includes(_role))
+    .map((role) => generatePolicyStatement(role, event.methodArn));
 
-  const statement = generatePolicyStatement(role, event.methodArn);
+  if (statements.length === 0) {
+    statements.push(defaultDenyAllStatement);
+  }
 
   return {
     principalId: username,
     policyDocument: {
       Version: "2012-10-17",
-      Statement: [statement],
+      Statement: statements,
     },
     context: {
       userId,
