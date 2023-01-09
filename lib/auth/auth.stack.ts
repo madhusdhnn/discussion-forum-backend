@@ -45,7 +45,7 @@ export class AuthStack extends Stack {
         },
       },
       customAttributes: {
-        userId: new StringAttribute({ mutable: false }),
+        userId: new StringAttribute({ mutable: true }),
         firstName: new StringAttribute({ minLen: 1, mutable: true }),
         lastName: new StringAttribute({ minLen: 1, mutable: true }),
       },
