@@ -53,8 +53,6 @@ exports.handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AuthRes
     throw new Error("Unauthorized"); // API Gateway expects exact error message for 401 status code
   }
 
-  const email = payload["email"] as string;
-  const userId = payload["custom:userId"] as string;
   const username = payload["cognito:username"] as string;
   const groups = payload["cognito:groups"] || [];
 
@@ -73,8 +71,6 @@ exports.handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AuthRes
       Statement: statements,
     },
     context: {
-      userId,
-      email,
       groups: JSON.stringify(groups),
     },
   };

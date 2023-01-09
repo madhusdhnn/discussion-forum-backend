@@ -1,6 +1,7 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
-import { DEFAULT_ERROR_MESSAGE, isAppError } from "../models/Errors";
+import { AccessDeniedError, DEFAULT_ERROR_MESSAGE, isAppError } from "../models/Errors";
+import { Roles } from "../models/Users";
 import { buildErrorResult, buildSuccessResult } from "../utils";
 
 const ddb = new DynamoDB.DocumentClient();
@@ -16,7 +17,11 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const channelId = event.pathParameters?.["channelId"] as string;
     const requestBody: ParticipantName = JSON.parse(event.body);
 
-    // TODO: allow further only if admin. Admin is about the Role
+    const groups = JSON.parse(event.requestContext.authorizer?.["groups"]) as string[];
+
+    if (groups.filter((group) => group === Roles.SuperAdmin || group === Roles.Admin).length === 0) {
+      throw new AccessDeniedError("Access Denied: (User not allowed to create channel. Contact your admin)");
+    }
 
     await ddb
       .update({
