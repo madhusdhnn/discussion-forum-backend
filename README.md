@@ -17,14 +17,5 @@ This repo contains infrastructure setup using AWS CDK and AWS lambda function ha
 
 ## TODOS
 
-- [x] Integrate Cognito User pool
-- [x] Authorize APIs based on Cognito Roles (Cognito/ Lambda authorizers)
-- [ ] Update some/ all lambdas to check access to channel for user from Cognito auth token
 - [ ] Get Channel by ID - Perhaps use Elasticache or DAX
-- [x] Client/ Server Error response segregation
-- [x] Support GET (all & filter) APIs
 - [ ] Support DELETE APIs
-- [x] Client input validation (400 response)
-- [x] Move CFN output names to common file
-- [ ] Create IAM roles & policies for resources (this should elimiate dependency of stacks. Also try to replace with CFN Outputs)
-- [ ] Create Cognito Groups with proper IAM permissions (eg: Admin - full access, user - limited R/ W access)
