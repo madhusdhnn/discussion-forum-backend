@@ -8,6 +8,7 @@ import { CdkCommons } from "../lib/cdk-commons";
 import { ChannelsStack } from "../lib/channels/channels.stack";
 import { DataStoreStack } from "../lib/datastore/datastore.stack";
 import { QuestionsStack } from "../lib/questions/questions.stack";
+import { UsersStack } from "../lib/users/users.stack";
 
 const app = new cdk.App();
 const stackProps = {
@@ -45,4 +46,8 @@ new QuestionsStack(app, "QuestionsStack", apiStack, dataStoreStack, commons, {
 new AnswersStack(app, "AnswersStack", apiStack, dataStoreStack, commons, {
   ...stackProps,
   description: "This stack creates the Lambda functions for Answer APIs",
+});
+new UsersStack(app, "UsersStack", apiStack, dataStoreStack, {
+  ...stackProps,
+  description: "This stack creates the Lambda functions for Users APIs",
 });

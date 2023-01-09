@@ -16,3 +16,13 @@ export interface IUser {
   createdAt: number;
   updatedAt: number;
 }
+
+export interface IUserResponse {
+  userId: string;
+  email: string;
+  cognitoSub: string;
+  firstName: string;
+  lastName: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
