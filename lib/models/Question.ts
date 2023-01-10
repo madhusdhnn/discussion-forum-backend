@@ -40,3 +40,8 @@ export interface IQuestionResponse extends IQuestionBase {
 }
 
 export interface IQuestionsPagedResponse extends IPagedResponse<IQuestionResponse> {}
+
+export interface IDeleteQuestionRequest {
+  requestedBy: string;
+  channelId: string;
+}

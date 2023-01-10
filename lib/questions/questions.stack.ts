@@ -72,6 +72,19 @@ export class QuestionsStack extends Stack {
 
     dataStoreStack.questionsTable.grantReadData(getQuestionFunction);
 
+    const deleteQuestionFunction = new NodejsFunction(this, "delete-question-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "questions.delete.ts"),
+      handler: "handler",
+      environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
+        QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
+      },
+    });
+
+    dataStoreStack.channelsTable.grantReadData(deleteQuestionFunction);
+    dataStoreStack.questionsTable.grantWriteData(deleteQuestionFunction);
+
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
@@ -89,5 +102,8 @@ export class QuestionsStack extends Stack {
       .addMethod("PUT", new LambdaIntegration(voteQuestionFunction, { proxy: true }), {
         authorizer: apiStack.dfTokenAuthorizer,
       });
+    questionResource.addMethod("DELETE", new LambdaIntegration(deleteQuestionFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
   }
 }

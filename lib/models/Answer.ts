@@ -56,3 +56,9 @@ export interface IAnswerResponse extends IAnswerBase {
 }
 
 export interface IAnswersPagedResponse extends IPagedResponse<IAnswerResponse> {}
+
+export interface IDeleteAnswerRequest {
+  channelId: string;
+  questionId: string;
+  requestedBy: string;
+}

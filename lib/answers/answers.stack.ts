@@ -91,6 +91,19 @@ export class AnswersStack extends Stack {
     dataStoreStack.questionsTable.grantReadData(getAllAnswersFunction);
     dataStoreStack.answersTable.grantReadData(getAllAnswersFunction);
 
+    const deleteAnswerFunction = new NodejsFunction(this, "delete-answer-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "answers.delete.ts"),
+      handler: "handler",
+      environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
+        ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
+      },
+    });
+
+    dataStoreStack.channelsTable.grantReadData(deleteAnswerFunction);
+    dataStoreStack.answersTable.grantWriteData(deleteAnswerFunction);
+
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
@@ -111,5 +124,8 @@ export class AnswersStack extends Stack {
       .addMethod("PUT", new LambdaIntegration(acceptAnswerFunction, { proxy: true }), {
         authorizer: apiStack.dfTokenAuthorizer,
       });
+    answerResource.addMethod("DELETE", new LambdaIntegration(deleteAnswerFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
   }
 }
