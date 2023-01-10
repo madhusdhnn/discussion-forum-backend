@@ -38,6 +38,6 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     return buildSuccessResult(null, 201);
   } catch (e: any) {
     console.error(e);
-    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE }, 500);
+    return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE });
   }
 };

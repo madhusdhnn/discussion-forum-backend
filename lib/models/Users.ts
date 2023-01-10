@@ -38,3 +38,8 @@ export interface IUserResponse {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface ISignInRequest {
+  username: string;
+  password: string;
+}

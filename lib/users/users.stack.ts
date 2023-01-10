@@ -39,6 +39,15 @@ export class UsersStack extends Stack {
       },
     });
 
+    const userSignInFunction = new NodejsFunction(this, "user-signin-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "users.signin.ts"),
+      handler: "handler",
+      environment: {
+        CLIENT_ID: Fn.importValue(commons.dfAppClientOutputName),
+      },
+    });
+
     const getUserFunction = new NodejsFunction(this, "get-me-user-function", {
       runtime: Runtime.NODEJS_14_X,
       entry: path.join(__dirname, "users.get-me.ts"),
@@ -53,6 +62,7 @@ export class UsersStack extends Stack {
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addResource("register").addMethod("POST", new LambdaIntegration(userRegisterFunction, { proxy: true }));
     apiResource.addResource("confirm").addMethod("POST", new LambdaIntegration(userConfirmFunction, { proxy: true }));
+    apiResource.addResource("signin").addMethod("POST", new LambdaIntegration(userSignInFunction, { proxy: true }));
 
     const userResource = apiResource.addResource("me");
     userResource.addMethod("GET", new LambdaIntegration(getUserFunction, { proxy: true }), {
