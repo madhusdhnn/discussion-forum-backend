@@ -50,7 +50,7 @@ export class UsersStack extends Stack {
 
     const getUserFunction = new NodejsFunction(this, "get-me-user-function", {
       runtime: Runtime.NODEJS_14_X,
-      entry: path.join(__dirname, "users.get-me.ts"),
+      entry: path.join(__dirname, "users.get.ts"),
       handler: "handler",
       environment: {
         USERS_TABLE_NAME: dataStoreStack.usersTable.tableName,
@@ -64,7 +64,7 @@ export class UsersStack extends Stack {
     apiResource.addResource("confirm").addMethod("POST", new LambdaIntegration(userConfirmFunction, { proxy: true }));
     apiResource.addResource("signin").addMethod("POST", new LambdaIntegration(userSignInFunction, { proxy: true }));
 
-    const userResource = apiResource.addResource("me");
+    const userResource = apiResource.addResource("{userId}");
     userResource.addMethod("GET", new LambdaIntegration(getUserFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
     });

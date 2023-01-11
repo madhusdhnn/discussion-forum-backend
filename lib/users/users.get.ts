@@ -8,7 +8,11 @@ const ddb = new DocumentClient();
 
 exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   try {
-    const userId = event.requestContext.authorizer?.userId as string;
+    let userId = event.pathParameters?.["userId"];
+
+    if (userId === "me") {
+      userId = event.requestContext.authorizer?.userId as string;
+    }
 
     const userResult = await ddb
       .get({

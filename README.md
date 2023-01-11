@@ -6,6 +6,8 @@ This repo contains infrastructure setup using AWS CDK and AWS lambda function ha
 2. Lambda (Node JS)
 3. DynamoDB
 
+_CAUTION_ All the resources created using CDK will have `RemovalPolicy` set to `DESTROY`. To retain any resource update it appropriately.
+
 ## Useful commands
 
 - `npm run build` compile typescript to js
