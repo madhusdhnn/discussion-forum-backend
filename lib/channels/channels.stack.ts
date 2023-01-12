@@ -68,6 +68,17 @@ export class ChannelsStack extends Stack {
 
     dataStoreStack.channelsTable.grantWriteData(deleteChannelFunction);
 
+    const membersFunction = new NodejsFunction(this, "get-members-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "channels.get-members.ts"),
+      handler: "handler",
+      environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
+      },
+    });
+
+    dataStoreStack.channelsTable.grantReadData(membersFunction);
+
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
@@ -86,5 +97,10 @@ export class ChannelsStack extends Stack {
     channelResource.addMethod("DELETE", new LambdaIntegration(deleteChannelFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
     });
+    channelResource
+      .addResource("participants")
+      .addMethod("GET", new LambdaIntegration(membersFunction, { proxy: true }), {
+        authorizer: apiStack.dfTokenAuthorizer,
+      });
   }
 }

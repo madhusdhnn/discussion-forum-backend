@@ -40,10 +40,13 @@ export interface IChannelResponse {
   channelId: string;
   name: string;
   visibility: ChannelVisibilityType;
-  participants: IParticipant[];
   totalQuestions: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IChannelParticipants {
+  participants: IParticipant[];
 }
 
 export interface IChannelsPagedResponse extends IPagedResponse<IChannelResponse> {}

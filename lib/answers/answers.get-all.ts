@@ -25,7 +25,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       TableName: process.env.ANSWERS_TABLE_NAME as string,
       IndexName: process.env.ANSWERS_VOTE_INDEX as string,
       KeyConditionExpression: "questionId = :questionId",
-      ScanIndexForward: false, // sort descending - top voted first
+      ScanIndexForward: false, // sort descending - top voted first (LSI)
       ExpressionAttributeValues: {
         ":questionId": questionId,
       },

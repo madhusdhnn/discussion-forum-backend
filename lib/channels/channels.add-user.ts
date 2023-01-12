@@ -6,7 +6,7 @@ import { buildErrorResult, buildSuccessResult } from "../utils";
 
 const ddb = new DynamoDB.DocumentClient();
 
-type ParticipantName = { name: string };
+type Participant = { name: string; userId: string };
 
 exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
@@ -15,12 +15,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
   try {
     const channelId = event.pathParameters?.["channelId"] as string;
-    const requestBody: ParticipantName = JSON.parse(event.body);
+    const requestBody: Participant = JSON.parse(event.body);
 
     const groups = JSON.parse(event.requestContext.authorizer?.["groups"]) as string[];
 
     if (groups.filter((group) => group === Roles.SuperAdmin || group === Roles.Admin).length === 0) {
-      throw new AccessDeniedError("Access Denied: (User not allowed to create channel. Contact your admin)");
+      throw new AccessDeniedError("Access Denied: (User not allowed to add member to the channel. Contact your admin)");
     }
 
     await ddb
@@ -32,7 +32,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
           "#P": "participants",
         },
         ExpressionAttributeValues: {
-          ":participants": [{ isOwner: false, name: requestBody.name }],
+          ":participants": [{ isOwner: false, name: requestBody.name, userId: requestBody.userId }],
         },
       })
       .promise();
