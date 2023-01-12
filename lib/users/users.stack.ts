@@ -48,7 +48,7 @@ export class UsersStack extends Stack {
       },
     });
 
-    const getUserFunction = new NodejsFunction(this, "get-me-user-function", {
+    const getUserFunction = new NodejsFunction(this, "get-user-function", {
       runtime: Runtime.NODEJS_14_X,
       entry: path.join(__dirname, "users.get.ts"),
       handler: "handler",
