@@ -14,7 +14,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   try {
     const requestBody = JSON.parse(event.body) as IConfirmUserRequest;
     const params: ConfirmSignUpRequest = {
-      ClientId: process.env.CLIENT_ID as string,
+      ClientId: process.env.DF_WEB_APP_CLIENT_ID as string,
       ConfirmationCode: requestBody.confirmationCode,
       Username: requestBody.email,
     };

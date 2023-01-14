@@ -76,16 +76,6 @@ export class ConflictError extends AppError {
   }
 }
 
-export class AccessDeniedError extends AppError {
-  readonly statusCode: number = 401;
-  readonly errorType: ErrorTypeStrings = ErrorType.Client;
-
-  constructor(message: string = DEFAULT_ERROR_MESSAGE) {
-    super(message);
-    this.name = "AccessDeniedError";
-  }
-}
-
 export class NotFoundError extends AppError {
   readonly statusCode: number = 404;
   readonly errorType: ErrorTypeStrings = ErrorType.Client;

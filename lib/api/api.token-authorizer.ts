@@ -2,9 +2,9 @@ import { Effect } from "aws-cdk-lib/aws-iam";
 import { CognitoJwtVerifier } from "aws-jwt-verify";
 import { APIGatewayTokenAuthorizerEvent, AuthResponse, Statement } from "aws-lambda";
 
-import { Roles, RoleStrings } from "../../models/Users";
+import { Roles, RoleStrings } from "../models/Users";
 
-const userPoolId = process.env.USER_POOL_ID as string;
+const userPoolId = process.env.DF_USER_POOL_ID as string;
 const dfWebAppClientId = process.env.DF_WEB_APP_CLIENT_ID as string;
 
 const cognitoJwtVerifier = CognitoJwtVerifier.create({ userPoolId });
@@ -20,7 +20,7 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
   const methodArnSections = methodArn.split(":");
   const resourcePathSpecifier = methodArnSections[5];
 
-  let effect = !role ? Effect.DENY : Effect.ALLOW;
+  let effect = Effect.ALLOW;
 
   if (
     resourcePathSpecifier.endsWith("POST/channels") ||
@@ -30,13 +30,13 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
     effect = role === "SUPER_ADMIN" || role === "ADMIN" ? Effect.ALLOW : Effect.DENY;
   }
 
-  const arn = `arn:aws:execute-api:${process.env.AWS_REGION}:${process.env.ACCOUNT_ID}:${process.env.REST_API_ID}`;
+  const arn = `arn:aws:execute-api:${process.env.AWS_REGION}:${process.env.ACCOUNT_ID}:${process.env.DF_REST_API_ID}`;
 
   return {
     Sid: "DiscussionForumApiAccess",
     Effect: effect,
     Action: "execute-api:Invoke",
-    Resource: `${arn}/${process.env.REST_API_STAGE_NAME}/*`,
+    Resource: `${arn}/*/*`,
   };
 };
 

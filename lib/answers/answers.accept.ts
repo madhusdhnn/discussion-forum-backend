@@ -2,7 +2,7 @@ import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IAnswerAcceptRequest } from "../models/Answer";
 import { IChannel } from "../models/Channel";
-import { AccessDeniedError, DEFAULT_ERROR_MESSAGE, isAppError, NotFoundError } from "../models/Errors";
+import { DEFAULT_ERROR_MESSAGE, ForbiddenRequestError, isAppError, NotFoundError } from "../models/Errors";
 import { buildErrorResult, buildSuccessResult, ensureChannelAccessForUser } from "../utils";
 
 const ddb = new DocumentClient();
@@ -35,17 +35,14 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .get({
         TableName: process.env.QUESTIONS_TABLE_NAME as string,
         Key: { channelId: requestBody.channelId, questionId: requestBody.questionId },
-        ProjectionExpression: "#O",
-        ExpressionAttributeNames: {
-          "#O": "owner",
-        },
+        ProjectionExpression: "postedBy",
       })
       .promise();
 
-    const { owner } = getQuestionsResult.Item as any;
+    const { postedBy } = getQuestionsResult.Item as any;
 
-    if (requestBody.acceptor !== owner) {
-      throw new AccessDeniedError(`Access denied: (User ${requestBody.acceptor} is not the owner of the question)`);
+    if (requestBody.acceptor !== postedBy) {
+      throw new ForbiddenRequestError(`Forbidden: (User ${requestBody.acceptor} is not the owner of the question)`);
     }
 
     await ddb

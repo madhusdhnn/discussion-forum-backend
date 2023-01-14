@@ -16,7 +16,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const result = await cognito
       .initiateAuth({
         AuthFlow: "USER_PASSWORD_AUTH",
-        ClientId: process.env.CLIENT_ID as string,
+        ClientId: process.env.DF_WEB_APP_CLIENT_ID as string,
         AuthParameters: {
           USERNAME: signInRequest.username,
           PASSWORD: signInRequest.password,

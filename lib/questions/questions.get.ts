@@ -28,7 +28,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       channelId: question.channelId,
       questionId: question.questionId,
       question: question.question,
-      owner: question.owner,
+      postedBy: question.postedBy,
       totalAnswers: question.totalAnswers,
       totalVotes: question.totalVotes,
       createdAt: new Date(question.createdAt as number),

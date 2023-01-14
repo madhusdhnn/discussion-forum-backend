@@ -1,7 +1,7 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { randomBytes } from "crypto";
 import { IChannel } from "./models/Channel";
-import { AccessDeniedError, IllegalArgumentError } from "./models/Errors";
+import { ForbiddenRequestError, IllegalArgumentError } from "./models/Errors";
 import { VoteOpType } from "./models/Vote";
 
 export const buildSuccessResult = <T>(
@@ -37,8 +37,8 @@ export const ensureChannelAccessForUser = (channel: IChannel, user: string) => {
     channel.visibility === "PRIVATE" &&
     !channel.participants.find((participant) => participant.name.toLowerCase() === user.toLowerCase())
   ) {
-    throw new AccessDeniedError(
-      `Access denied: (User - ${user} does not have access to the channel - ${channel.name})`
+    throw new ForbiddenRequestError(
+      `Forbidden: (User - ${user} does not have access to the channel - ${channel.name})`
     );
   }
 };

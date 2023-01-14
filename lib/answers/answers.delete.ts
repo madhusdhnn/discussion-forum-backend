@@ -39,11 +39,23 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
         },
       })
       .promise();
+
+    await ddb
+      .update({
+        TableName: process.env.QUESTIONS_TABLE_NAME as string,
+        Key: { channelId, questionId },
+        UpdateExpression: "SET totalAnswers = totalAnswers - :value",
+        ExpressionAttributeValues: {
+          ":value": 1,
+        },
+      })
+      .promise();
+
     return buildSuccessResult(null, 204);
   } catch (e: any) {
     console.error(e);
     if (e.code && e.code === "ConditionalCheckFailedException") {
-      return buildErrorResult({ message: `Access Denied: (User: ${requestedBy} is not the owner of the answer)` }, 403);
+      return buildErrorResult({ message: `Forbidden: (User: ${requestedBy} is not the owner of the answer)` }, 403);
     }
     return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE });
   }

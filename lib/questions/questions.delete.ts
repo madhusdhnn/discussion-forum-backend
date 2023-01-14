@@ -29,9 +29,20 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .delete({
         TableName: process.env.QUESTIONS_TABLE_NAME as string,
         Key: { channelId, questionId },
-        ConditionExpression: "owner = :requestedBy",
+        ConditionExpression: "postedBy = :requestedBy",
         ExpressionAttributeValues: {
           ":requestedBy": requestedBy,
+        },
+      })
+      .promise();
+
+    await ddb
+      .update({
+        TableName: process.env.CHANNELS_TABLE_NAME as string,
+        Key: { channelId },
+        UpdateExpression: "SET totalQuestions = totalQuestions - :value",
+        ExpressionAttributeValues: {
+          ":value": 1,
         },
       })
       .promise();
@@ -39,10 +50,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   } catch (e: any) {
     console.error(e);
     if (e.code && e.code === "ConditionalCheckFailedException") {
-      return buildErrorResult(
-        { message: `Access Denied: (User: ${requestedBy} is not the owner of the question)` },
-        403
-      );
+      return buildErrorResult({ message: `Forbidden: (User: ${requestedBy} is not the owner of the question)` }, 403);
     }
     return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE });
   }

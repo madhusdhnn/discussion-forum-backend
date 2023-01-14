@@ -14,7 +14,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .get({
         TableName: process.env.CHANNELS_TABLE_NAME as string,
         Key: { channelId: channelId },
-        ProjectionExpression: "channelId,name,owner,visibility,totalQuestions,createdAt,updatedAt",
+        ProjectionExpression: "channelId,#CHNL_NAME,createdBy,visibility,totalQuestions,createdAt,updatedAt",
+        ExpressionAttributeNames: {
+          "#CHNL_NAME": "name",
+        },
       })
       .promise();
 
@@ -27,7 +30,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const response: IChannelResponse = {
       channelId: channel.channelId,
       name: channel.name,
-      owner: channel.owner,
+      createdBy: channel.createdBy,
       visibility: channel.visibility,
       totalQuestions: channel.totalQuestions,
       createdAt: new Date(channel.createdAt as number),

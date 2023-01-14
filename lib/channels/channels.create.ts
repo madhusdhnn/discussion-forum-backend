@@ -22,12 +22,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
   try {
     const dbData: IChannel = {
-      owner: channelRequest.owner,
+      createdBy: channelRequest.createdBy,
       channelId: channelId,
       name: channelRequest.name,
       visibility: channelVisibility,
       totalQuestions: 0,
-      participants: [{ isOwner: true, name: channelRequest.owner }],
+      participants: [{ isOwner: true, name: channelRequest.createdBy }],
       createdAt: new Date().getTime(),
       updatedAt: new Date().getTime(),
     };

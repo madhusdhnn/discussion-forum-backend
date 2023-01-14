@@ -15,7 +15,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const dbParams: ScanInput = {
       TableName: process.env.CHANNELS_TABLE_NAME as string,
       Limit: count,
-      ProjectionExpression: "channelId,name,owner,visibility,totalQuestions,createdAt,updatedAt",
+      ProjectionExpression: "channelId,#CHNL_NAME,createdBy,visibility,totalQuestions,createdAt,updatedAt",
+      ExpressionAttributeNames: {
+        "#CHNL_NAME": "name",
+      },
     };
 
     if (nextEvaluationKey) {
@@ -25,12 +28,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const result = await ddb.scan(dbParams).promise();
 
     const items = (result.Items || []).map((item): IChannelResponse => {
-      const { channelId, name, owner, totalQuestions, visibility, createdAt, updatedAt } = item;
+      const { channelId, name, createdBy, totalQuestions, visibility, createdAt, updatedAt } = item;
       return {
         channelId,
         name,
         totalQuestions,
-        owner,
+        createdBy,
         visibility,
         createdAt: new Date(createdAt),
         updatedAt: new Date(updatedAt),

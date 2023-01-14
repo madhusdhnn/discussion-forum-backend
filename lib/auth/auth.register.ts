@@ -15,7 +15,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
   try {
     const userRequest = JSON.parse(event.body) as IUserRequest;
     const params: SignUpRequest = {
-      ClientId: process.env.CLIENT_ID as string,
+      ClientId: process.env.DF_WEB_APP_CLIENT_ID as string,
       Username: userRequest.email,
       Password: userRequest.password,
       UserAttributes: [

@@ -7,7 +7,7 @@ export const ChannelVisibility = {
 } as const;
 
 export interface IChannelRequest {
-  owner: string;
+  createdBy: string;
   name: string;
   visibility: string;
 }
@@ -25,7 +25,7 @@ export interface IParticipant {
 }
 
 export interface IChannel {
-  owner: string;
+  createdBy: string;
   channelId: string;
   name: string;
   visibility: ChannelVisibilityType;
@@ -36,7 +36,7 @@ export interface IChannel {
 }
 
 export interface IChannelResponse {
-  owner: string;
+  createdBy: string;
   channelId: string;
   name: string;
   visibility: ChannelVisibilityType;

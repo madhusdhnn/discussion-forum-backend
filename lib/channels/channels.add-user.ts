@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DynamoDB } from "aws-sdk";
-import { AccessDeniedError, DEFAULT_ERROR_MESSAGE, isAppError } from "../models/Errors";
+import { DEFAULT_ERROR_MESSAGE, ForbiddenRequestError, isAppError } from "../models/Errors";
 import { Roles } from "../models/Users";
 import { buildErrorResult, buildSuccessResult } from "../utils";
 
@@ -20,7 +20,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const groups = JSON.parse(event.requestContext.authorizer?.["groups"]) as string[];
 
     if (groups.filter((group) => group === Roles.SuperAdmin || group === Roles.Admin).length === 0) {
-      throw new AccessDeniedError("Access Denied: (User not allowed to add member to the channel. Contact your admin)");
+      throw new ForbiddenRequestError("Forbidden: (User not allowed to add member to the channel. Contact your admin)");
     }
 
     await ddb

@@ -50,7 +50,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     console.error(e);
     if (e.code && e.code === "ConditionalCheckFailedException") {
       return buildErrorResult(
-        { message: `Access Denied: (User: ${requestBody.updatedBy} is not the owner of the answer)` },
+        { message: `Forbidden: (User: ${requestBody.updatedBy} is not the owner of the answer)` },
         403
       );
     }

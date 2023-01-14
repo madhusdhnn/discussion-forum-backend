@@ -82,7 +82,7 @@ export class QuestionsStack extends Stack {
       },
     });
 
-    dataStoreStack.channelsTable.grantReadData(deleteQuestionFunction);
+    dataStoreStack.channelsTable.grantReadWriteData(deleteQuestionFunction);
     dataStoreStack.questionsTable.grantWriteData(deleteQuestionFunction);
 
     const apiResource = apiStack.restApi.root.addResource(apiPath);

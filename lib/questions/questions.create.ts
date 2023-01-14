@@ -29,12 +29,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       throw new NotFoundError(`No channel found: (Channel ID: ${questionRequest.channelId})`);
     }
 
-    ensureChannelAccessForUser(channel, questionRequest.owner);
+    ensureChannelAccessForUser(channel, questionRequest.postedBy);
 
     const nowTime = new Date().getTime();
 
     const dbData: IQuestion = {
-      owner: questionRequest.owner,
+      postedBy: questionRequest.postedBy,
       channelId: questionRequest.channelId,
       question: questionRequest.question,
       questionId: questionId,
