@@ -1,7 +1,9 @@
-import { Fn, Stack, StackProps } from "aws-cdk-lib";
+import { Duration, Fn, Stack, StackProps } from "aws-cdk-lib";
 import { LambdaIntegration } from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import { Queue } from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 import { ApiStack } from "../api/api.stack";
 import { CdkCommons } from "../cdk-commons";
@@ -85,11 +87,46 @@ export class QuestionsStack extends Stack {
     dataStoreStack.channelsTable.grantReadWriteData(deleteQuestionFunction);
     dataStoreStack.questionsTable.grantWriteData(deleteQuestionFunction);
 
+    const deleteAllQuestionsQueue = new Queue(this, "delete-all-questions-queue", {
+      queueName: "DeleteAllQuestionsQueue",
+      visibilityTimeout: Duration.seconds(15),
+    });
+
+    const deleteAllQuestionsFunction = new NodejsFunction(this, "delete-all-questions-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "questions.delete-all.ts"),
+      handler: "handler",
+      environment: {
+        DELETE_ALL_QUESTIONS_QUEUE_URL: deleteAllQuestionsQueue.queueUrl,
+      },
+    });
+
+    const deleteAllQuestionsProcessorFunction = new NodejsFunction(this, "delete-all-questions-processor-function", {
+      runtime: Runtime.NODEJS_14_X,
+      entry: path.join(__dirname, "questions.delete-all-processor.ts"),
+      handler: "handler",
+      environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
+        QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
+        ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
+      },
+    });
+
+    dataStoreStack.channelsTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
+    dataStoreStack.questionsTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
+    dataStoreStack.answersTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
+
+    deleteAllQuestionsProcessorFunction.addEventSource(new SqsEventSource(deleteAllQuestionsQueue));
+
     const apiResource = apiStack.restApi.root.addResource(apiPath);
     apiResource.addMethod("POST", new LambdaIntegration(postFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
     });
     apiResource.addMethod("GET", new LambdaIntegration(getAllQuestionsFunction, { proxy: true }), {
+      authorizer: apiStack.dfTokenAuthorizer,
+    });
+
+    apiResource.addMethod("DELETE", new LambdaIntegration(deleteAllQuestionsFunction, { proxy: true }), {
       authorizer: apiStack.dfTokenAuthorizer,
     });
 

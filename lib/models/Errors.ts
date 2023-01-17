@@ -85,3 +85,13 @@ export class NotFoundError extends AppError {
     this.name = "NotFoundError";
   }
 }
+
+export class EntityNotEmptyError extends AppError {
+  readonly statusCode: number = 500;
+  readonly errorType: ErrorTypeStrings = ErrorType.Server;
+
+  constructor(message: string = DEFAULT_ERROR_MESSAGE) {
+    super(message);
+    this.name = "EntityNotEmptyError";
+  }
+}

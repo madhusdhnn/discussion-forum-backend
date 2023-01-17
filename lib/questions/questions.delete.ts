@@ -40,9 +40,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .update({
         TableName: process.env.CHANNELS_TABLE_NAME as string,
         Key: { channelId },
-        UpdateExpression: "SET totalQuestions = totalQuestions - :value",
+        UpdateExpression: "SET totalQuestions = totalQuestions - :value, updatedAt = :updatedAt",
         ExpressionAttributeValues: {
           ":value": 1,
+          ":updatedAt": new Date().getTime(),
         },
       })
       .promise();

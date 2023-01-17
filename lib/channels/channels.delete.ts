@@ -13,11 +13,18 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .delete({
         TableName: process.env.CHANNELS_TABLE_NAME as string,
         Key: { channelId },
+        ConditionExpression: "totalQuestions = :totalQuestions",
+        ExpressionAttributeValues: {
+          ":totalQuestions": 0,
+        },
       })
       .promise();
     return buildSuccessResult(null, 204);
   } catch (e: any) {
     console.error(e);
+    if (e.code && e.code === "ConditionalCheckFailedException") {
+      return buildErrorResult({ message: "Channel is not empty" }, 500);
+    }
     return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE });
   }
 };

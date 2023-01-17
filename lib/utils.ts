@@ -61,3 +61,11 @@ export const base64Encode = (plainText: string): string => {
 export const base64Decode = (encoded: string): string => {
   return Buffer.from(encoded, "base64").toString();
 };
+
+export const chunkArray = <T>(data: T[], size: number = 10): T[][] => {
+  return data.reduce((accumulated: T[][], current: T, index: number) => {
+    const chunkId = Math.floor(index / size);
+    accumulated[chunkId] = ([] as T[]).concat(accumulated[chunkId] || ([] as T[]), current);
+    return accumulated;
+  }, [] as T[][]);
+};
