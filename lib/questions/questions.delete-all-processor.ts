@@ -30,7 +30,6 @@ exports.handler = async (event: SQSEvent, context: Context): Promise<void> => {
       return;
     }
 
-    console.log(`Retrive questions for channel: ${channelId}`);
     const questions = await getQuestions(channelId);
 
     if (questions.length > 0) {
@@ -39,18 +38,13 @@ exports.handler = async (event: SQSEvent, context: Context): Promise<void> => {
         questionsChunked.map(async (chunk) => {
           await Promise.all(
             chunk.map(async (question) => {
-              console.log(`Retrive answers for question: ${question.questionId}`);
               const answers = await getAnswers(question.questionId);
               if (answers.length > 0) {
-                console.log(`[START] Delete answers for question: ${question.questionId}`);
                 await deleteAnswers(answers);
-                console.log(`[END] Delete answers for question: ${question.questionId}`);
               }
             })
           );
-          console.log(`[START] Delete questions in channel: ${channelId}`);
           await deleteQuestions(chunk);
-          console.log(`[END] Delete questions in channel: ${channelId}`);
         })
       );
 

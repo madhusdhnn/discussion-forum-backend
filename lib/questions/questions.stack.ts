@@ -78,14 +78,17 @@ export class QuestionsStack extends Stack {
       runtime: Runtime.NODEJS_14_X,
       entry: path.join(__dirname, "questions.delete.ts"),
       handler: "handler",
+      timeout: Duration.seconds(5),
       environment: {
         CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,
+        ANSWERS_TABLE_NAME: dataStoreStack.answersTable.tableName,
       },
     });
 
     dataStoreStack.channelsTable.grantReadWriteData(deleteQuestionFunction);
     dataStoreStack.questionsTable.grantWriteData(deleteQuestionFunction);
+    dataStoreStack.answersTable.grantReadWriteData(deleteQuestionFunction);
 
     const deleteAllQuestionsQueue = new Queue(this, "delete-all-questions-queue", {
       queueName: "DeleteAllQuestionsQueue",
@@ -101,10 +104,13 @@ export class QuestionsStack extends Stack {
       },
     });
 
+    deleteAllQuestionsQueue.grantSendMessages(deleteAllQuestionsFunction);
+
     const deleteAllQuestionsProcessorFunction = new NodejsFunction(this, "delete-all-questions-processor-function", {
       runtime: Runtime.NODEJS_14_X,
       entry: path.join(__dirname, "questions.delete-all-processor.ts"),
       handler: "handler",
+      timeout: Duration.seconds(5),
       environment: {
         CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
         QUESTIONS_TABLE_NAME: dataStoreStack.questionsTable.tableName,

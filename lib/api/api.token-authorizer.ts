@@ -25,7 +25,8 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
   if (
     resourcePathSpecifier.endsWith("POST/channels") ||
     resourcePathSpecifier.includes("PUT/channels") ||
-    resourcePathSpecifier.includes("DELETE/channels" || resourcePathSpecifier.endsWith("DELETE/questions"))
+    resourcePathSpecifier.includes("DELETE/channels") ||
+    resourcePathSpecifier.endsWith("DELETE/questions")
   ) {
     effect = role === "SUPER_ADMIN" || role === "ADMIN" ? Effect.ALLOW : Effect.DENY;
   }

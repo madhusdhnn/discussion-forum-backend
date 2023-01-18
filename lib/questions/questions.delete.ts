@@ -1,8 +1,9 @@
 import { APIGatewayEvent, APIGatewayProxyResult, Context } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
+import { IAnswer } from "../models/Answer";
 import { DEFAULT_ERROR_MESSAGE, NotFoundError } from "../models/Errors";
 import { IDeleteQuestionRequest } from "../models/Question";
-import { buildErrorResult, buildSuccessResult } from "../utils";
+import { buildErrorResult, buildSuccessResult, chunkArray } from "../utils";
 
 const ddb = new DocumentClient();
 
@@ -13,7 +14,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
   const { channelId, requestedBy } = JSON.parse(event.body) as IDeleteQuestionRequest;
   try {
-    const questionId = event.pathParameters?.["questionId"];
+    const questionId = event.pathParameters?.["questionId"] as string;
     const getChannelResult = await ddb
       .get({
         TableName: process.env.CHANNELS_TABLE_NAME as string,
@@ -24,6 +25,9 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     if (!getChannelResult.Item) {
       throw new NotFoundError(`No channel found: (Channel ID: ${channelId})`);
     }
+
+    const answers = await getAnswers(questionId);
+    await deleteAnswers(answers);
 
     await ddb
       .delete({
@@ -55,4 +59,40 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     }
     return buildErrorResult({ message: DEFAULT_ERROR_MESSAGE });
   }
+};
+
+const getAnswers = async (questionId: string) => {
+  const answersResult = await ddb
+    .query({
+      TableName: process.env.ANSWERS_TABLE_NAME as string,
+      KeyConditionExpression: "questionId = :questionId",
+      ExpressionAttributeValues: {
+        ":questionId": questionId,
+      },
+    })
+    .promise();
+
+  const answers = (answersResult.Items || []) as IAnswer[];
+  return answers;
+};
+
+const deleteAnswers = async (answers: IAnswer[]) => {
+  const answersChunked = chunkArray<IAnswer>(answers, 25);
+  const answersDeleteRequestBatched = answersChunked.map(async (chunk) => {
+    const answersDeleteRequests = chunk.map((answer) => ({
+      DeleteRequest: {
+        Key: { questionId: answer.questionId, answerId: answer.answerId },
+      },
+    }));
+
+    await ddb
+      .batchWrite({
+        RequestItems: {
+          [process.env.ANSWERS_TABLE_NAME as string]: answersDeleteRequests,
+        },
+      })
+      .promise();
+  });
+
+  await Promise.all(answersDeleteRequestBatched);
 };
