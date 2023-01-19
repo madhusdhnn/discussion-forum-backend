@@ -56,7 +56,7 @@ new AnswersStack(app, "AnswersStack", apiStack, dataStoreStack, commons, {
   description: "This stack creates the Lambda functions for Answer APIs",
 });
 
-new UsersStack(app, "UsersStack", apiStack, dataStoreStack, {
+new UsersStack(app, "UsersStack", apiStack, dataStoreStack, cognitoStack, {
   ...stackProps,
   description: "This stack creates the Lambda functions for Users APIs",
 });

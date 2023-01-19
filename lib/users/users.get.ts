@@ -18,7 +18,6 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       .get({
         TableName: process.env.USERS_TABLE_NAME as string,
         Key: { userId },
-        ProjectionExpression: "userId,email,cognitoSub,firstName,lastName,createdAt,updatedAt",
       })
       .promise();
 
@@ -33,6 +32,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       cognitoSub: user.cognitoSub,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
       createdAt: new Date(user.createdAt),
       updatedAt: new Date(user.updatedAt),
     };

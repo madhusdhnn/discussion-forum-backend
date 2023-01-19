@@ -31,6 +31,10 @@ const generatePolicyStatement = (role: RoleStrings, methodArn: string): Statemen
     effect = role === "SUPER_ADMIN" || role === "ADMIN" ? Effect.ALLOW : Effect.DENY;
   }
 
+  if (resourcePathSpecifier.endsWith("PUT/users/roles")) {
+    effect = role === "SUPER_ADMIN" ? Effect.ALLOW : Effect.DENY;
+  }
+
   const arn = `arn:aws:execute-api:${process.env.AWS_REGION}:${process.env.ACCOUNT_ID}:${process.env.DF_REST_API_ID}`;
 
   return {

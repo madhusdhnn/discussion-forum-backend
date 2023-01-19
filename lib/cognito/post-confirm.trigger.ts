@@ -11,8 +11,6 @@ exports.handler = async (
   event: PostConfirmationConfirmSignUpTriggerEvent,
   context: Context
 ): Promise<PostConfirmationConfirmSignUpTriggerEvent> => {
-  console.log(JSON.stringify(event), "Event");
-
   const { userAttributes } = event.request;
   const nowTime = new Date().getTime();
 
