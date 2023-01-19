@@ -6,6 +6,7 @@ import { IQuestionResponse, IQuestionsPagedResponse } from "../models/Question";
 import { base64Decode, base64Encode, buildErrorResult, buildSuccessResult } from "../utils";
 
 const ddb = new DocumentClient();
+const MAX_COUNT = 90;
 
 exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   try {
@@ -17,6 +18,10 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     if (count < 1) {
       throw new ValidationError("Count must be greater than zero");
+    }
+
+    if (count > MAX_COUNT) {
+      throw new ValidationError(`Count can not be greater than ${MAX_COUNT}`);
     }
 
     const dbParams: any = {
@@ -31,12 +36,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
 
     const nextEvaluationKey = event.queryStringParameters?.["nextEvaluationKey"];
 
-    const startDateTime = event.queryStringParameters?.["startDateTime"];
-    const endDateTime = event.queryStringParameters?.["endDateTime"];
-
     if (nextEvaluationKey) {
       dbParams.ExclusiveStartKey = JSON.parse(base64Decode(nextEvaluationKey));
     }
+
+    const startDateTime = event.queryStringParameters?.["startDateTime"];
+    const endDateTime = event.queryStringParameters?.["endDateTime"];
 
     if (startDateTime) {
       if (!endDateTime) {
@@ -54,6 +59,15 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       dbParams.ExpressionAttributeValues = Object.assign({}, dbParams.ExpressionAttributeValues, {
         ":startDateTime": new Date(startDateTime).getTime(),
         ":endDateTime": new Date(endDateTime).getTime(),
+      });
+    }
+
+    const isUnAnswered = Boolean(event.queryStringParameters?.["isUnAnswered"]);
+
+    if (isUnAnswered) {
+      dbParams.FilterExpression = "totalAnswers = :unAnsweredValue";
+      dbParams.ExpressionAttributeValues = Object.assign({}, dbParams.ExpressionAttributeValues, {
+        ":unAnsweredValue": 0,
       });
     }
 
