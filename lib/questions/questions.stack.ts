@@ -100,6 +100,7 @@ export class QuestionsStack extends Stack {
       entry: path.join(__dirname, "questions.delete-all.ts"),
       handler: "handler",
       environment: {
+        CHANNELS_TABLE_NAME: dataStoreStack.channelsTable.tableName,
         DELETE_ALL_QUESTIONS_QUEUE_URL: deleteAllQuestionsQueue.queueUrl,
       },
     });
