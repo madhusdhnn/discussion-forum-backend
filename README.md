@@ -20,4 +20,3 @@ _CAUTION_ All the resources created using CDK will have `RemovalPolicy` set to `
 ## TODOS
 
 - [ ] Get Channel by ID - Perhaps use Elasticache or DAX
-- [ ] Support DELETE APIs
