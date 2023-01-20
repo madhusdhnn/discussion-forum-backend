@@ -2,7 +2,6 @@ import { Context, SQSEvent } from "aws-lambda";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { IAnswer } from "../models/Answer";
 import { IChannel } from "../models/Channel";
-import { NotFoundError } from "../models/Errors";
 import { IQuestion } from "../models/Question";
 import { chunkArray } from "../utils";
 
@@ -11,26 +10,14 @@ const ddb = new DocumentClient();
 exports.handler = async (event: SQSEvent, context: Context): Promise<void> => {
   try {
     const message = event.Records[0];
-    const channelId = JSON.parse(message.body) as string;
-    const getChannelResult = await ddb
-      .get({
-        TableName: process.env.CHANNELS_TABLE_NAME as string,
-        Key: { channelId },
-      })
-      .promise();
-
-    const channel = getChannelResult.Item as IChannel;
-
-    if (!channel) {
-      throw new NotFoundError(`No channel found: (Channel ID: ${channelId})`);
-    }
+    const channel = JSON.parse(message.body) as IChannel;
 
     if (channel.totalQuestions === 0) {
       console.log("No questions found. Deletion skipped..");
       return;
     }
 
-    const questions = await getQuestions(channelId);
+    const questions = await getQuestions(channel.channelId);
 
     if (questions.length > 0) {
       const questionsChunked = chunkArray<IQuestion>(questions, 25);
@@ -53,7 +40,7 @@ exports.handler = async (event: SQSEvent, context: Context): Promise<void> => {
       await ddb
         .update({
           TableName: process.env.CHANNELS_TABLE_NAME as string,
-          Key: { channelId },
+          Key: { channelId: channel.channelId },
           UpdateExpression: "SET totalQuestions = :value, updatedAt = :updatedAt",
           ExpressionAttributeValues: {
             ":value": 0,

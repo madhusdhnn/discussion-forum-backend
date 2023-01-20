@@ -104,6 +104,7 @@ export class QuestionsStack extends Stack {
       },
     });
 
+    dataStoreStack.channelsTable.grantReadData(deleteAllQuestionsFunction);
     deleteAllQuestionsQueue.grantSendMessages(deleteAllQuestionsFunction);
 
     const deleteAllQuestionsProcessorFunction = new NodejsFunction(this, "delete-all-questions-processor-function", {
@@ -118,7 +119,7 @@ export class QuestionsStack extends Stack {
       },
     });
 
-    dataStoreStack.channelsTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
+    dataStoreStack.channelsTable.grantWriteData(deleteAllQuestionsProcessorFunction);
     dataStoreStack.questionsTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
     dataStoreStack.answersTable.grantReadWriteData(deleteAllQuestionsProcessorFunction);
 
