@@ -1,9 +1,7 @@
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from "aws-cdk-lib";
-import { AttributeType, CfnTable, Table } from "aws-cdk-lib/aws-dynamodb";
+import { AttributeType, Table } from "aws-cdk-lib/aws-dynamodb";
 import { Construct } from "constructs";
 import { CdkCommons } from "../cdk-commons";
-
-export type LocalSecondaryIndexListType = Array<CfnTable.LocalSecondaryIndexProperty> | undefined;
 
 export class DataStoreStack extends Stack {
   readonly channelsTable: Table;
