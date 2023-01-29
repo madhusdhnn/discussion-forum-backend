@@ -34,9 +34,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const nowTime = new Date().getTime();
 
     const dbData: IQuestion = {
-      postedBy: questionRequest.postedBy,
-      channelId: questionRequest.channelId,
-      question: questionRequest.question,
+      ...questionRequest,
       questionId: questionId,
       totalVotes: 0,
       totalAnswers: 0,

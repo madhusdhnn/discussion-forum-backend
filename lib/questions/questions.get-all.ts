@@ -74,11 +74,12 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
     const result = await ddb.query(dbParams).promise();
 
     const items = (result.Items || []).map((item): IQuestionResponse => {
-      const { channelId, questionId, question, postedBy, totalAnswers, totalVotes, createdAt, updatedAt } = item;
+      const { channelId, questionId, question, body, postedBy, totalAnswers, totalVotes, createdAt, updatedAt } = item;
       return {
         channelId,
         questionId,
         question,
+        body,
         postedBy,
         totalAnswers,
         totalVotes,

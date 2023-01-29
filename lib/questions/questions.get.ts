@@ -29,6 +29,7 @@ exports.handler = async (event: APIGatewayEvent, context: Context): Promise<APIG
       questionId: question.questionId,
       question: question.question,
       postedBy: question.postedBy,
+      body: question.body,
       totalAnswers: question.totalAnswers,
       totalVotes: question.totalVotes,
       createdAt: new Date(question.createdAt as number),

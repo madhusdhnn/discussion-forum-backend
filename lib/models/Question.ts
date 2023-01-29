@@ -2,12 +2,14 @@ import { IPagedResponse } from "./Pagination";
 
 export interface IQuestionRequest {
   question: string;
+  body: string;
   postedBy: string;
   channelId: string;
 }
 
 export interface IQuestionBase {
   question: string;
+  body: string;
   postedBy: string;
   questionId: string;
   channelId: string;
