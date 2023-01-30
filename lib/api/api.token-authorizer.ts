@@ -7,7 +7,7 @@ import { Roles, RoleStrings } from "../models/Users";
 const userPoolId = process.env.DF_USER_POOL_ID as string;
 const dfWebAppClientId = process.env.DF_WEB_APP_CLIENT_ID as string;
 
-const cognitoJwtVerifier = CognitoJwtVerifier.create({ userPoolId });
+const idTokenVerifier = CognitoJwtVerifier.create({ userPoolId, clientId: dfWebAppClientId, tokenUse: "id" });
 
 const defaultDenyAllStatement: Statement = {
   Sid: "DiscussionForumApiDefaultDeny",
@@ -53,10 +53,7 @@ exports.handler = async (event: APIGatewayTokenAuthorizerEvent): Promise<AuthRes
 
   let payload;
   try {
-    payload = await cognitoJwtVerifier.verify(authorizationToken, {
-      clientId: dfWebAppClientId,
-      tokenUse: "id",
-    });
+    payload = await idTokenVerifier.verify(authorizationToken);
   } catch (e: any) {
     console.error(e);
     throw new Error("Unauthorized"); // API Gateway expects exact error message for 401 status code
