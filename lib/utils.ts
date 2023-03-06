@@ -10,7 +10,12 @@ export const buildSuccessResult = <T>(
 ): APIGatewayProxyResult => {
   return {
     statusCode,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE",
+    },
     body: body ? JSON.stringify(body) : "",
   };
 };
@@ -18,7 +23,12 @@ export const buildSuccessResult = <T>(
 export const buildErrorResult = (error: any = null, statusCode: number = 500): APIGatewayProxyResult => {
   return {
     statusCode,
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT,DELETE",
+    },
     body: error ? JSON.stringify(error) : "",
   };
 };
